@@ -1,0 +1,11 @@
+--- a/net/minecraft/world/item/BucketItem.java
++++ b/net/minecraft/world/item/BucketItem.java
+@@ -147,7 +_,7 @@
+             // CraftBukkit end
+             if (!flag) {
+                 return hitResult != null && this.emptyContents(entity, level, hitResult.getBlockPos().relative(hitResult.getDirection()), null, direction, clicked, itemstack, hand); // CraftBukkit
+-            } else if ((level.dimensionType().ultraWarm() || (level.isTheEnd() && !org.purpurmc.purpur.PurpurConfig.allowWaterPlacementInTheEnd)) && this.content.is(FluidTags.WATER)) { // Purpur - Add allow water in end world option
++            } else if ((level.dimensionType().ultraWarm() && !level.sakuraConfig().environment.allowWaterInTheNether || (level.isTheEnd() && !org.purpurmc.purpur.PurpurConfig.allowWaterPlacementInTheEnd)) && this.content.is(FluidTags.WATER)) { // Sakura - allow water in the nether // Purpur - Add allow water in end world option
+                 int x = pos.getX();
+                 int y = pos.getY();
+                 int z = pos.getZ();

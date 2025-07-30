@@ -1,0 +1,16 @@
+--- a/net/minecraft/world/entity/animal/IronGolem.java
++++ b/net/minecraft/world/entity/animal/IronGolem.java
+@@ -287,6 +_,13 @@
+         }
+     }
+ 
++    // Sakura start - configure iron golems taking fall damage
++    @Override
++    protected final boolean isFallDamageImmune() {
++        return !this.level().sakuraConfig().entity.ironGolemsTakeFalldamage && super.isFallDamageImmune();
++    }
++    // Sakura end - configure iron golems taking fall damage
++
+     public int getAttackAnimationTick() {
+         return this.attackAnimationTick;
+     }

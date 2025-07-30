@@ -1,0 +1,217 @@
+--- a/net/minecraft/world/entity/LivingEntity.java
++++ b/net/minecraft/world/entity/LivingEntity.java
+@@ -288,6 +_,43 @@
+     public int shieldBlockingDelay = this.level().paperConfig().misc.shieldBlockingDelay; // Paper - Make shield blocking delay configurable
+     protected boolean shouldBurnInDay = false; public boolean shouldBurnInDay() { return this.shouldBurnInDay; } public void setShouldBurnInDay(boolean shouldBurnInDay) { this.shouldBurnInDay = shouldBurnInDay; } // Purpur - API for any mob to burn daylight
+     // CraftBukkit end
++    // Sakura start - legacy combat mechanics
++    private static final ResourceLocation LEGACY_COMBAT_MODIFIER_ID = ResourceLocation.fromNamespaceAndPath("sakura", "legacy_combat");
++    private static final AttributeModifier LEGACY_ATTACK_SPEED_MODIFIER = new AttributeModifier(LEGACY_COMBAT_MODIFIER_ID, 100.0, AttributeModifier.Operation.ADD_VALUE);
++
++    private void updateAttackSpeedModifier() {
++        AttributeInstance attackSpeed = this.getAttribute(Attributes.ATTACK_SPEED);
++        if (attackSpeed != null) {
++            attackSpeed.removeModifier(LEGACY_ATTACK_SPEED_MODIFIER);
++
++            if (this.level().sakuraConfig().players.combat.legacyCombatMechanics) {
++                attackSpeed.addTransientModifier(LEGACY_ATTACK_SPEED_MODIFIER);
++            }
++        }
++    }
++
++    protected final float getAttackDamageFromAttributes() {
++        AttributeInstance attackDamage = this.getAttribute(Attributes.ATTACK_DAMAGE);
++        AttributeModifier legacyModifier = null;
++
++        if (this.level().sakuraConfig().players.combat.legacyCombatMechanics) {
++            ItemStack heldItem = this.lastEquipmentItems.get(EquipmentSlot.MAINHAND);
++            double attackDifference = me.samsuik.sakura.player.combat.CombatUtil.getLegacyAttackDifference(heldItem);
++            legacyModifier = new AttributeModifier(LEGACY_COMBAT_MODIFIER_ID, attackDifference, AttributeModifier.Operation.ADD_VALUE);
++        }
++
++        final double damage;
++        if (attackDamage == null || legacyModifier == null) {
++            damage = this.getAttributeValue(Attributes.ATTACK_DAMAGE);
++        } else {
++            attackDamage.addTransientModifier(legacyModifier);
++            damage = this.getAttributeValue(Attributes.ATTACK_DAMAGE);
++            attackDamage.removeModifier(legacyModifier);
++        }
++
++        return (float) damage;
++    }
++    // Sakura end - legacy combat mechanics
+ 
+     protected LivingEntity(EntityType<? extends LivingEntity> entityType, Level level) {
+         super(entityType, level);
+@@ -1563,7 +_,7 @@
+                     }
+                     // Paper end - Check distance in entity interactions
+ 
+-                    this.knockback(0.4F, d, d1, damageSource.getDirectEntity(), damageSource.getDirectEntity() == null ? io.papermc.paper.event.entity.EntityKnockbackEvent.Cause.DAMAGE : io.papermc.paper.event.entity.EntityKnockbackEvent.Cause.ENTITY_ATTACK); // CraftBukkit // Paper - knockback events
++                    this.knockback((float) this.level().sakuraConfig().players.knockback.baseKnockback, d, d1, damageSource.getDirectEntity(), damageSource.getDirectEntity() == null ? io.papermc.paper.event.entity.EntityKnockbackEvent.Cause.DAMAGE : io.papermc.paper.event.entity.EntityKnockbackEvent.Cause.ENTITY_ATTACK); // CraftBukkit // Paper - knockback events // Sakura - configure entity knockback
+                     if (!flag) {
+                         this.indicateDamage(d, d1);
+                     }
+@@ -1665,6 +_,11 @@
+             if (itemBlockingWith == null) {
+                 return false;
+             } else {
++                // Sakura start - shield damage reduction & allow blocking with swords
++                if (itemBlockingWith.getItem() instanceof me.samsuik.sakura.player.item.BlockableSwordItem swordItem && swordItem.isSafeToOverrideBlocking(itemBlockingWith)) {
++                    return true;
++                }
++                 // Sakura end - shield damage reduction & allow blocking with swords
+                 BlocksAttacks blocksAttacks = itemBlockingWith.get(DataComponents.BLOCKS_ATTACKS);
+                 if (blocksAttacks != null && !blocksAttacks.bypassedBy().map(damageSource::is).orElse(false)) {
+                     if (damageSource.getDirectEntity() instanceof AbstractArrow abstractArrow && abstractArrow.getPierceLevel() > 0) {
+@@ -1691,6 +_,12 @@
+             acos = (float) Math.PI;
+         }
+ 
++        // Sakura start - shield damage reduction & allow blocking with swords
++        if (me.samsuik.sakura.player.combat.CombatUtil.overrideBlockingAndHalveDamage(this.getItemBlockingWith(), this)) {
++            final boolean lookingAtSource = acos <= (float) (Math.PI / 180.0) * 90.0;
++            return lookingAtSource ? damageAmount * 0.5f : 0.0f;
++        }
++        // Sakura end - shield damage reduction & allow blocking with swords
+         BlocksAttacks blocksAttacks = this.getItemBlockingWith().get(DataComponents.BLOCKS_ATTACKS);
+         return blocksAttacks.resolveBlockedDamage(damageSource, damageAmount, acos);
+     }
+@@ -1758,7 +_,7 @@
+     }
+ 
+     protected void blockedByItem(LivingEntity entity) {
+-        entity.knockback(0.5, entity.getX() - this.getX(), entity.getZ() - this.getZ(), this, io.papermc.paper.event.entity.EntityKnockbackEvent.Cause.SHIELD_BLOCK); // CraftBukkit // Paper - fix attacker & knockback events
++        entity.knockback((float) this.level().sakuraConfig().players.knockback.shieldHitKnockback, entity.getX() - this.getX(), entity.getZ() - this.getZ(), this, io.papermc.paper.event.entity.EntityKnockbackEvent.Cause.SHIELD_BLOCK); // CraftBukkit // Paper - fix attacker & knockback events // Sakura - configure entity knockback
+     }
+ 
+     private boolean checkTotemDeathProtection(DamageSource damageSource) {
+@@ -1927,6 +_,12 @@
+ 
+             // Paper start
+             if (this.dead) { // Paper
++                // Sakura start - instant mob death animation
++                if (this.level().sakuraConfig().entity.instantDeathAnimation && !(this instanceof Player)) {
++                    this.deathTime = 20;
++                    return;
++                }
++                // Sakura end - instant mob death animation
+                 this.level().broadcastEntityEvent(this, (byte)3);
+ 
+             this.setPose(Pose.DYING);
+@@ -2102,7 +_,7 @@
+     }
+ 
+     public void knockback(double strength, double x, double z, @Nullable Entity attacker, io.papermc.paper.event.entity.EntityKnockbackEvent.Cause eventCause) { // Paper - knockback events
+-        strength *= 1.0 - this.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
++        strength *= 1.0 - this.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE) * this.level().sakuraConfig().players.knockback.knockbackResistanceModifier; // Sakura - configure entity knockback
+         if (true || !(strength <= 0.0)) { // CraftBukkit - Call event even when force is 0
+             // this.hasImpulse = true; // CraftBukkit - Move down
+             Vec3 deltaMovement = this.getDeltaMovement();
+@@ -2113,10 +_,18 @@
+             }
+ 
+             Vec3 vec3 = new Vec3(x, 0.0, z).normalize().scale(strength);
++            // Sakura start - configure entity knockback
++            double velocityY = deltaMovement.y / 2.0D + this.level().sakuraConfig().players.knockback.knockbackVertical.or(strength);
++            if (!this.level().sakuraConfig().players.knockback.verticalKnockbackRequireGround || this.onGround()) {
++                velocityY = Math.min(this.level().sakuraConfig().players.knockback.knockbackVerticalLimit, velocityY);
++            } else {
++                velocityY = deltaMovement.y;
++            }
++            // Sakura end - configure entity knockback
+             // Paper start - knockback events
+             Vec3 finalVelocity = new Vec3(
+                 deltaMovement.x / 2.0 - vec3.x,
+-                this.onGround() ? Math.min(0.4, deltaMovement.y / 2.0 + strength) : deltaMovement.y,
++                velocityY, // Sakura - configure entity knockback
+                 deltaMovement.z / 2.0 - vec3.z
+             );
+             Vec3 diff = finalVelocity.subtract(deltaMovement);
+@@ -2261,8 +_,14 @@
+         }
+     }
+ 
++    // Sakura start - configure iron golems taking fall damage
++    protected boolean isFallDamageImmune() {
++        return this.getType().is(EntityTypeTags.FALL_DAMAGE_IMMUNE);
++    }
++
+     protected int calculateFallDamage(double fallDistance, float damageMultiplier) {
+-        if (this.getType().is(EntityTypeTags.FALL_DAMAGE_IMMUNE)) {
++        if (this.isFallDamageImmune()) {
++            // Sakura end - configure iron golems taking fall damage
+             return 0;
+         } else {
+             double d = this.calculateFallPower(fallDistance);
+@@ -2320,9 +_,21 @@
+     protected float getDamageAfterArmorAbsorb(DamageSource damageSource, float damageAmount) {
+         if (!damageSource.is(DamageTypeTags.BYPASSES_ARMOR)) {
+             // this.hurtArmor(damageSource, damageAmount); // CraftBukkit - actuallyHurt(DamageSource, float, EntityDamageEvent) for damage handling
++            // Sakura start - legacy combat mechanics
++            if (!this.level().sakuraConfig().players.combat.legacyCombatMechanics) {
+             damageAmount = CombatRules.getDamageAfterAbsorb(
+                 this, damageAmount, damageSource, this.getArmorValue(), (float)this.getAttributeValue(Attributes.ARMOR_TOUGHNESS)
+             );
++            } else {
++                // See: applyArmorModifier(DamageSource, float)
++                // int k = 1.0 - (20.0 / 25.0);
++                // int i = 25 - this.getArmorValue();
++                // float f1 = damageAmount * (float) i;
++                // damageAmount = f1 / 25.0F;
++                    float armorDamageModifier = 1.0f - (this.getArmorValue() / 25.0f);
++                    damageAmount *= armorDamageModifier;
++            }
++            // Sakura end - legacy combat mechanics
+         }
+ 
+         return damageAmount;
+@@ -2502,6 +_,12 @@
+                 armorDamage += (float) event.getDamage(DamageModifier.BLOCKING);
+                 armorDamage += (float) event.getDamage(DamageModifier.FREEZING);
+                 armorDamage += (float) event.getDamage(DamageModifier.HARD_HAT);
++                // Sakura start - add max armour durability damage
++                final int maxArmourDamage = this.level().sakuraConfig().players.combat.maxArmourDamage.or(-1);
++                if (maxArmourDamage >= 0) {
++                    armorDamage = Math.min(armorDamage, maxArmourDamage);
++                }
++                // Sakura end - add max armour durability damage
+                 this.hurtArmor(damageSource, armorDamage);
+             }
+ 
+@@ -3463,6 +_,11 @@
+                     if (this.level() instanceof ServerLevel serverLevel) {
+                         EnchantmentHelper.runLocationChangedEffects(serverLevel, itemBySlot, this, equipmentSlot1);
+                     }
++                    // Sakura start - legacy combat mechanics
++                    if (this instanceof ServerPlayer && equipmentSlot1 == EquipmentSlot.MAINHAND) {
++                        this.updateAttackSpeedModifier();
++                    }
++                    // Sakura end - legacy combat mechanics
+                 }
+             }
+ 
+@@ -3680,7 +_,7 @@
+             // Purpur end - Ridables
+         }
+         // Paper end - Add EntityMoveEvent
+-        if (this.level() instanceof ServerLevel serverLevel && this.isSensitiveToWater() && this.isInWaterOrRain()) {
++        if (this.level() instanceof ServerLevel serverLevel && this.level().sakuraConfig().entity.waterSensitivity && this.isSensitiveToWater() && this.isInWaterOrRain()) { // Sakura - configure entity water sensitivity
+             this.hurtServer(serverLevel, this.damageSources().drown(), 1.0F);
+         }
+ 
+@@ -4290,6 +_,13 @@
+         if (!this.isUsingItem()) {
+             return null;
+         } else {
++            // Sakura start - allow blocking with swords
++            final ItemStack usingItem = this.useItem;
++            if (usingItem.getItem() instanceof me.samsuik.sakura.player.item.BlockableSwordItem swordItem && swordItem.isSafeToOverrideBlocking(usingItem)) {
++                return usingItem;
++            }
++            // Sakura end - allow blocking with swords
++
+             BlocksAttacks blocksAttacks = this.useItem.get(DataComponents.BLOCKS_ATTACKS);
+             if (blocksAttacks != null) {
+                 int i = this.useItem.getItem().getUseDuration(this.useItem, this) - this.useItemRemaining;

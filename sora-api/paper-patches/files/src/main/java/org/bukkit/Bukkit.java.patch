@@ -1,0 +1,23 @@
+--- a/src/main/java/org/bukkit/Bukkit.java
++++ b/src/main/java/org/bukkit/Bukkit.java
+@@ -128,6 +_,20 @@
+         // Paper end
+     }
+ 
++    // Sakura start - customise version command; expose git information
++    @NotNull
++    public static String getGitInformation() {
++        final io.papermc.paper.ServerBuildInfo version = io.papermc.paper.ServerBuildInfo.buildInfo();
++        final String gitBranch = version.gitBranch().orElse("Dev");
++        final String gitCommit = version.gitCommit().orElse("");
++        String branchMsg = " on " + gitBranch;
++        if ("master".equals(gitBranch) || "main".equals(gitBranch)) {
++            branchMsg = "";  // Don't show branch on main/master
++        }
++        return "(Git: " + gitCommit + branchMsg + ")";
++    }
++    // Sakura end - customise version command; expose git information
++
+     /**
+      * Gets the name of this server implementation.
+      *

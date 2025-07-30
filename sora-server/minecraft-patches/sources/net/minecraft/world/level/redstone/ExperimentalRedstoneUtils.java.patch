@@ -1,0 +1,10 @@
+--- a/net/minecraft/world/level/redstone/ExperimentalRedstoneUtils.java
++++ b/net/minecraft/world/level/redstone/ExperimentalRedstoneUtils.java
+@@ -14,6 +_,7 @@
+                 orientation = orientation.withUp(up);
+             }
+ 
++            // Sakura - redstone implementation api; conflict on change
+             if (front != null) {
+                 orientation = orientation.withFront(front);
+             }

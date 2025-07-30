@@ -1,0 +1,20 @@
+--- a/src/main/java/io/papermc/paper/configuration/Configurations.java
++++ b/src/main/java/io/papermc/paper/configuration/Configurations.java
+@@ -95,7 +_,7 @@
+         };
+     }
+ 
+-    static <T> CheckedFunction<ConfigurationNode, T, SerializationException> reloader(Class<T> type, T instance) {
++    public static <T> CheckedFunction<ConfigurationNode, T, SerializationException> reloader(Class<T> type, T instance) { // Sakura - package-protected -> public
+         return node -> {
+             ObjectMapper.Factory factory = (ObjectMapper.Factory) Objects.requireNonNull(node.options().serializers().get(type));
+             ObjectMapper.Mutable<T> mutable = (ObjectMapper.Mutable<T>) factory.get(type);
+@@ -230,7 +_,7 @@
+             .path(worldConfigFile)
+             .build();
+         final ConfigurationNode worldNode = worldLoader.load();
+-        if (newFile) { // set the version field if new file
++        if (newFile && this instanceof PaperConfigurations) { // Sakura - hack this into working // set the version field if new file
+             worldNode.node(Configuration.VERSION_FIELD).set(this.worldConfigVersion());
+         } else {
+             this.verifyWorldConfigVersion(contextMap, worldNode);

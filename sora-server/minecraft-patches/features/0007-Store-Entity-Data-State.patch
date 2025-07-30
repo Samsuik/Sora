@@ -1,0 +1,44 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Samsuik <kfian294ma4@gmail.com>
+Date: Wed, 16 Aug 2023 22:34:49 +0100
+Subject: [PATCH] Store Entity Data/State
+
+
+diff --git a/net/minecraft/world/entity/Entity.java b/net/minecraft/world/entity/Entity.java
+index a3bd9f8a3c4a85538a4bd0513e2d99cf71d1bd28..bf68518abb30cf4c12e98f16737d568b27e856fa 100644
+--- a/net/minecraft/world/entity/Entity.java
++++ b/net/minecraft/world/entity/Entity.java
+@@ -554,6 +554,21 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
+         return flags;
+     }
+     // Sakura end - load chunks on movement
++    // Sakura start - store entity data/state
++    private me.samsuik.sakura.entity.EntityState entityState = null;
++
++    public final void storeEntityState() {
++        this.entityState = me.samsuik.sakura.entity.EntityState.of(this);
++    }
++
++    public final me.samsuik.sakura.entity.EntityState entityState() {
++        return this.entityState;
++    }
++
++    public final boolean compareState(Entity to) {
++        return to.entityState() != null && to.entityState().comparePositionAndMotion(this);
++    }
++    // Sakura end - store entity data/state
+ 
+     // Purpur start - Add canSaveToDisk to Entity
+     public boolean canSaveToDisk() {
+diff --git a/net/minecraft/world/level/Level.java b/net/minecraft/world/level/Level.java
+index 421b9c665b65f13707f4e653b79c2ab21f2e7ddc..77e838ec254b9849a6546bf399968eea6ed6e4f6 100644
+--- a/net/minecraft/world/level/Level.java
++++ b/net/minecraft/world/level/Level.java
+@@ -1544,6 +1544,7 @@ public abstract class Level implements LevelAccessor, UUIDLookup<Entity>, AutoCl
+ 
+     public <T extends Entity> void guardEntityTick(Consumer<T> consumerEntity, T entity) {
+         try {
++            entity.storeEntityState(); // Sakura - store entity data/state
+             consumerEntity.accept(entity);
+         } catch (Throwable var6) {
+             // Paper start - Prevent block entity and entity crashes

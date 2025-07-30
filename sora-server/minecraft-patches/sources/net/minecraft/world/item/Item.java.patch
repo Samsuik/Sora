@@ -1,0 +1,14 @@
+--- a/net/minecraft/world/item/Item.java
++++ b/net/minecraft/world/item/Item.java
+@@ -136,6 +_,11 @@
+         return this.builtInRegistryHolder;
+     }
+ 
++    // Sakura start - modify components sent to the client
++    public void modifyComponentsSentToClient(net.minecraft.core.component.PatchedDataComponentMap components) {
++    }
++    // Sakura end - modify components sent to the client
++
+     public DataComponentMap components() {
+         return this.components;
+     }

@@ -1,0 +1,11 @@
+--- a/src/main/java/org/spigotmc/SpigotConfig.java
++++ b/src/main/java/org/spigotmc/SpigotConfig.java
+@@ -229,7 +_,7 @@
+     }
+ 
+     private static void tpsCommand() {
+-        SpigotConfig.commands.put("tps", new TicksPerSecondCommand("tps"));
++        // Sakura - track tick information; replace tps command
+     }
+ 
+     public static int playerSample;

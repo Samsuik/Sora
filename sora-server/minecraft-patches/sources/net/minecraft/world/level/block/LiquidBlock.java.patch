@@ -1,0 +1,32 @@
+--- a/net/minecraft/world/level/block/LiquidBlock.java
++++ b/net/minecraft/world/level/block/LiquidBlock.java
+@@ -140,7 +_,7 @@
+     }
+     // Paper start - Configurable speed for water flowing over lava
+     public int getFlowSpeed(Level level, BlockPos pos) {
+-        if (net.minecraft.core.registries.BuiltInRegistries.FLUID.wrapAsHolder(this.fluid).is(FluidTags.WATER)) {
++        if (this.fluid.getTickDelay(level) != level.paperConfig().environment.waterOverLavaFlowSpeed && net.minecraft.core.registries.BuiltInRegistries.FLUID.wrapAsHolder(this.fluid).is(FluidTags.WATER)) { // Sakura - avoid expensive lava search
+             if (
+                 isLava(level, pos.north(1)) ||
+                 isLava(level, pos.south(1)) ||
+@@ -150,7 +_,7 @@
+                 return level.paperConfig().environment.waterOverLavaFlowSpeed;
+             }
+         }
+-        return this.fluid.getTickDelay(level);
++        return this.fluid.getTickDelay(level, pos); // Sakura - lava flow speed api
+     }
+     private static boolean isLava(Level level, BlockPos pos) {
+         final FluidState fluidState = level.getFluidIfLoaded(pos);
+@@ -189,6 +_,11 @@
+ 
+             for (Direction direction : POSSIBLE_FLOW_DIRECTIONS) {
+                 BlockPos blockPos = pos.relative(direction.getOpposite());
++                // Sakura start - configure fluid ticking outside the world border
++                if (level.sakuraConfig().environment.disableFluidsFlowingThroughTheWorldBorder && !level.getWorldBorder().isWithinBounds(blockPos)) {
++                    continue;
++                }
++                // Sakura end - configure fluid ticking outside the world border
+                 if (level.getFluidState(blockPos).is(FluidTags.WATER)) {
+                     Block block = level.getFluidState(pos).isSource() ? Blocks.OBSIDIAN : Blocks.COBBLESTONE;
+                     // CraftBukkit start

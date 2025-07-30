@@ -1,0 +1,21 @@
+--- a/src/main/java/org/bukkit/craftbukkit/entity/CraftFallingBlock.java
++++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftFallingBlock.java
+@@ -14,6 +_,18 @@
+         super(server, entity);
+     }
+ 
++    // Sakura start - falling block height parity api
++    @Override
++    public final void setHeightParity(boolean parity) {
++        this.getHandle().heightParity = parity;
++    }
++
++    @Override
++    public final boolean getHeightParity() {
++        return this.getHandle().heightParity;
++    }
++    // Sakura end - falling block height parity api
++
+     @Override
+     public FallingBlockEntity getHandle() {
+         return (FallingBlockEntity) this.entity;

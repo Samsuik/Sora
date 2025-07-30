@@ -1,0 +1,24 @@
+--- a/net/minecraft/world/entity/projectile/FishingHook.java
++++ b/net/minecraft/world/entity/projectile/FishingHook.java
+@@ -298,6 +_,12 @@
+         if (!this.level().isClientSide) {
+             this.setHookedEntity(result.getEntity());
+         }
++        // Sakura start - configure entity knockback
++        if (this.level().sakuraConfig().players.knockback.fishingHooksApplyKnockback) {
++            final Entity entity = result.getEntity();
++            entity.hurt(this.damageSources().thrown(this, this.getOwner()), 0.0f);
++        }
++        // Sakura end - configure entity knockback
+     }
+ 
+     @Override
+@@ -599,7 +_,7 @@
+ 
+     public void pullEntity(Entity entity) {
+         Entity owner = this.getOwner();
+-        if (owner != null) {
++        if (owner != null && (this.level().sakuraConfig().players.fishingHooksPullEntities || entity instanceof ItemEntity)) { // Sakura - configure fishing hooks pulling entities
+             Vec3 vec3 = new Vec3(owner.getX() - this.getX(), owner.getY() - this.getY(), owner.getZ() - this.getZ()).scale(0.1);
+             entity.setDeltaMovement(entity.getDeltaMovement().add(vec3));
+         }

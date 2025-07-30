@@ -1,0 +1,16 @@
+--- a/net/minecraft/world/entity/projectile/ThrownEnderpearl.java
++++ b/net/minecraft/world/entity/projectile/ThrownEnderpearl.java
+@@ -180,6 +_,13 @@
+         }
+     }
+ 
++    // Sakura start - enderpearls use outline for collision
++    @Override
++    protected net.minecraft.world.level.ClipContext.Block getClipType() {
++        return this.level().sakuraConfig().entity.enderPearl.useOutlineForCollision ? net.minecraft.world.level.ClipContext.Block.OUTLINE : super.getClipType();
++    }
++    // Sakura end - enderpearls use outline for collision
++
+     @Override
+     public void tick() {
+         int sectionPosX = SectionPos.blockToSectionCoord(this.position().x());

@@ -1,0 +1,17 @@
+--- a/src/main/java/org/bukkit/craftbukkit/Main.java
++++ b/src/main/java/org/bukkit/craftbukkit/Main.java
+@@ -172,6 +_,14 @@
+                     .describedAs("Yml file");
+                 // Purpur end - Purpur config files
+ 
++                // Sakura start - sakura configuration files
++                acceptsAll(asList("sakura-dir", "sakura-settings-directory"), "Directory for Sakura settings")
++                    .withRequiredArg()
++                    .ofType(File.class)
++                    .defaultsTo(new File(me.samsuik.sakura.configuration.SakuraConfigurations.CONFIG_DIR))
++                    .describedAs("Config directory");
++                // Sakura end - sakura configuration files
++
+                 this.accepts("server-name", "Name of the server")
+                         .withRequiredArg()
+                         .ofType(String.class)

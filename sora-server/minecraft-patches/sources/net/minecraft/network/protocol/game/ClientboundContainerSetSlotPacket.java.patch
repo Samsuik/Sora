@@ -1,0 +1,11 @@
+--- a/net/minecraft/network/protocol/game/ClientboundContainerSetSlotPacket.java
++++ b/net/minecraft/network/protocol/game/ClientboundContainerSetSlotPacket.java
+@@ -19,7 +_,7 @@
+         this.containerId = containerId;
+         this.stateId = stateId;
+         this.slot = slot;
+-        this.itemStack = itemStack.copy();
++        this.itemStack = itemStack.copyForPacket(); // Sakura - modify components sent to the client
+     }
+ 
+     private ClientboundContainerSetSlotPacket(RegistryFriendlyByteBuf buffer) {

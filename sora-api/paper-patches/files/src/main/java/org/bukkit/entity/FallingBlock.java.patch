@@ -1,0 +1,25 @@
+--- a/src/main/java/org/bukkit/entity/FallingBlock.java
++++ b/src/main/java/org/bukkit/entity/FallingBlock.java
+@@ -9,6 +_,22 @@
+  */
+ public interface FallingBlock extends Entity {
+ 
++    // Sakura start - falling block height parity api
++    /**
++     * Gets if falling block has height parity
++     *
++     * @return parity
++     */
++    boolean getHeightParity();
++
++    /**
++     * Sets falling block height parity
++     *
++     * @param parity value
++     */
++    void setHeightParity(boolean parity);
++    // Sakura end - falling block height parity api
++
+     /**
+      * Get the Material of the falling block
+      *

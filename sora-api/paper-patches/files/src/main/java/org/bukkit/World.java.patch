@@ -1,0 +1,13 @@
+--- a/src/main/java/org/bukkit/World.java
++++ b/src/main/java/org/bukkit/World.java
+@@ -204,6 +_,10 @@
+         return new Location(this, x, y, z);
+     }
+     // Paper end
++    // Sakura start
++    @NotNull
++    me.samsuik.sakura.local.storage.LocalStorageHandler getStorageHandler();
++    // Sakura end
+ 
+     /**
+      * Gets the highest non-empty (impassable) block at the given coordinates.

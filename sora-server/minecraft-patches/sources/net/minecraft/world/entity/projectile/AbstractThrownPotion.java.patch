@@ -1,0 +1,28 @@
+--- a/net/minecraft/world/entity/projectile/AbstractThrownPotion.java
++++ b/net/minecraft/world/entity/projectile/AbstractThrownPotion.java
+@@ -39,6 +_,25 @@
+         super(entityType, x, y, z, level, item);
+     }
+ 
++    // Sakura start - configure potion mechanics
++    @Override
++    public void shoot(double x, double y, double z, float speed, float divergence) {
++        super.shoot(x, y, z, speed, divergence);
++
++        net.minecraft.world.phys.Vec3 movement = this.getDeltaMovement();
++        double moveX = movement.x * this.level().sakuraConfig().entity.thrownPotion.horizontalSpeed;
++        double moveY = movement.y * this.level().sakuraConfig().entity.thrownPotion.verticalSpeed;
++        double moveZ = movement.z * this.level().sakuraConfig().entity.thrownPotion.horizontalSpeed;
++
++        this.setDeltaMovement(moveX, moveY, moveZ);
++    }
++
++    @Override
++    protected boolean checkLeftOwner() {
++        return super.checkLeftOwner() || this.level().sakuraConfig().entity.thrownPotion.allowBreakingInsideEntities && this.tickCount >= 5;
++    }
++    // Sakura end - configure potion mechanics
++
+     @Override
+     protected double getDefaultGravity() {
+         return 0.05;

@@ -1,0 +1,22 @@
+--- a/net/minecraft/world/entity/projectile/ThrowableProjectile.java
++++ b/net/minecraft/world/entity/projectile/ThrowableProjectile.java
+@@ -42,12 +_,18 @@
+         return true;
+     }
+ 
++    // Sakura start - enderpearls use outline for collision
++    protected net.minecraft.world.level.ClipContext.Block getClipType() {
++        return net.minecraft.world.level.ClipContext.Block.COLLIDER;
++    }
++    // Sakura end - enderpearls use outline for collision
++
+     @Override
+     public void tick() {
+         this.handleFirstTickBubbleColumn();
+         this.applyGravity();
+         this.applyInertia();
+-        HitResult hitResultOnMoveVector = ProjectileUtil.getHitResultOnMoveVector(this, this::canHitEntity);
++        HitResult hitResultOnMoveVector = ProjectileUtil.getHitResultOnMoveVector(this, this::canHitEntity, this.getClipType()); // Sakura - enderpearls use outline for collision
+         Vec3 location;
+         if (hitResultOnMoveVector.getType() != HitResult.Type.MISS) {
+             location = hitResultOnMoveVector.getLocation();

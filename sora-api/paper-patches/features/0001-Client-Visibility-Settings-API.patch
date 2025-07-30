@@ -1,0 +1,25 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Samsuik <kfian294ma4@gmail.com>
+Date: Tue, 21 Sep 2021 23:54:25 +0100
+Subject: [PATCH] Client Visibility Settings API
+
+
+diff --git a/src/main/java/org/bukkit/entity/Player.java b/src/main/java/org/bukkit/entity/Player.java
+index 285f3171991870a2b61db7fcec9e90f115f3788b..6264df264c0d0e433a629b9df86fdbc3dc485fde 100644
+--- a/src/main/java/org/bukkit/entity/Player.java
++++ b/src/main/java/org/bukkit/entity/Player.java
+@@ -70,6 +70,14 @@ public interface Player extends HumanEntity, Conversable, OfflinePlayer, PluginM
+ 
+     void setTrackingRangeModifier(double mod);
+     // Sakura end - entity tracking range modifier
++    // Sakura start - client visibility settings api
++    /**
++     * Server-side api to disable sending visual effects to the client.
++     *
++     * @return visibility api
++     */
++    me.samsuik.sakura.player.visibility.VisibilitySettings getVisibility();
++    // Sakura end - client visibility settings api
+ 
+     // Paper start
+     @Override

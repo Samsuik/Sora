@@ -1,0 +1,17 @@
+--- a/net/minecraft/world/level/block/piston/PistonBaseBlock.java
++++ b/net/minecraft/world/level/block/piston/PistonBaseBlock.java
+@@ -369,6 +_,14 @@
+             for (int i1 = toPush.size() - 1; i1 >= 0; i1--) {
+                 // Paper start - fix a variety of piston desync dupes
+                 boolean allowDesync = io.papermc.paper.configuration.GlobalConfiguration.get().unsupportedSettings.allowPistonDuplication;
++                // Sakura start - configure tnt duplication
++                if (level.sakuraConfig().technical.allowTntDuplication) {
++                    final BlockState movedState = list.get(i1);
++                    if (movedState.is(Blocks.TNT) || movedState.getBlock() instanceof net.minecraft.world.level.block.BaseCoralPlantTypeBlock) {
++                        allowDesync = true;
++                    }
++                }
++                // Sakura end - configure tnt duplication
+                 BlockPos blockPos2;
+                 BlockPos oldPos = blockPos2 = toPush.get(i1);
+                 BlockState blockState1 = allowDesync ? level.getBlockState(oldPos) : null;

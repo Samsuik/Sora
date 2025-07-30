@@ -1,0 +1,33 @@
+--- a/net/minecraft/world/level/block/piston/PistonMovingBlockEntity.java
++++ b/net/minecraft/world/level/block/piston/PistonMovingBlockEntity.java
+@@ -46,6 +_,11 @@
+     private float progressO = 0.0F;
+     private long lastTicked;
+     private int deathTicks;
++    // Sakura start - cache moving block entity collision shape
++    private VoxelShape collisionShape = Shapes.empty();
++    private Direction shapeDirection = null;
++    private float shapeProgress = Float.MIN_VALUE;
++    // Sakura end - cache moving block entity collision shape
+ 
+     public PistonMovingBlockEntity(BlockPos pos, BlockState blockState) {
+         super(BlockEntityType.PISTON, pos, blockState);
+@@ -360,6 +_,18 @@
+     }
+ 
+     public VoxelShape getCollisionShape(BlockGetter level, BlockPos pos) {
++        // Sakura start - cache moving block entity collision shape
++        Direction direction = NOCLIP.get();
++        if (this.progress == this.shapeProgress && direction == this.shapeDirection) {
++            return this.collisionShape;
++        } else {
++            this.shapeProgress = this.progress;
++            this.shapeDirection = direction;
++            return this.collisionShape = this.createCollisionShape(level, pos);
++        }
++    }
++    private VoxelShape createCollisionShape(BlockGetter level, BlockPos pos) {
++        // Sakura end - cache moving block entity collision shape
+         VoxelShape collisionShape;
+         if (!this.extending && this.isSourcePiston && this.movedState.getBlock() instanceof PistonBaseBlock) {
+             collisionShape = this.movedState.setValue(PistonBaseBlock.EXTENDED, true).getCollisionShape(level, pos);
