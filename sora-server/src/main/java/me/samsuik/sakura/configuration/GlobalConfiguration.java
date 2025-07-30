@@ -29,14 +29,14 @@ public final class GlobalConfiguration extends ConfigurationPart {
 
     public Messages messages;
     public class Messages extends ConfigurationPart {
-        public String durableBlockInteraction = "<dark_gray>(<light_purple>S</light_purple>) <white>This block has <gray><remaining></gray> of <gray><durability>";
-        public String fpsSettingChange = "<dark_gray>(<light_purple>S</light_purple>) <gray><state> <yellow><name>";
+        public String durableBlockInteraction = "<dark_gray>(<aqua>S</aqua>) <white>This block has <gray><remaining></gray> of <gray><durability>";
+        public String fpsSettingChange = "<dark_gray>(<aqua>S</aqua>) <gray><state> <green><name>";
         public boolean tpsShowEntityAndChunkCount = true;
     }
 
     public Fps fps;
     public class Fps extends ConfigurationPart {
-        public Material material = Material.PINK_STAINED_GLASS_PANE;
+        public Material material = Material.LIGHT_BLUE_STAINED_GLASS_PANE;
     }
 
     public Players players;

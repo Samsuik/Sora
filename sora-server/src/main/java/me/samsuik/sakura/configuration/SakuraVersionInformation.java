@@ -10,11 +10,11 @@ import org.bukkit.command.CommandSender;
 
 public final class SakuraVersionInformation {
     private static final String VERSION_MESSAGE = """
-                <dark_purple>.
-                <dark_purple>| <white>This server is running <gradient:red:light_purple>Sakura</gradient>
-                <dark_purple>| <white>Commit<dark_gray>: \\<<commit>> <gray>targeting </gray>(<yellow>MC</yellow>: <gray><version></gray>)
-                <dark_purple>| <white>Github<dark_gray>: \\<<yellow><click:open_url:'https://github.com/Samsuik/Sakura'>link</click></yellow>>
-                <dark_purple>'""";
+                <dark_gray>.
+                <dark_gray>| <white>This server is running <gradient:aqua:green>Sora</gradient>
+                <dark_gray>| <white>Commit<dark_gray>: \\<<commit>> <gray>targeting </gray>(<green>MC</green>: <gray><version></gray>)
+                <dark_gray>| <white>Github<dark_gray>: \\<<green><click:open_url:'https://github.com/Samsuik/Sora'>link</click></green>>
+                <dark_gray>'""";
 
     public static void sendVersionToPlayer(final CommandSender sender) {
         sender.sendMessage(MiniMessage.miniMessage().deserialize(VERSION_MESSAGE,
@@ -24,7 +24,7 @@ public final class SakuraVersionInformation {
     }
 
     private static Component gitCommit() {
-        return Component.text("hover", NamedTextColor.YELLOW)
+        return Component.text("hover", NamedTextColor.GREEN)
             .hoverEvent(HoverEvent.showText(Component.text(Bukkit.getGitInformation())));
     }
 }
