@@ -153,7 +153,7 @@ index e96d4dee14c05f2fa329bfb1588ec795d4e3d730..ba9393e474ae213316c693d73ef2641e
  
          if (this.entity instanceof LivingEntity) {
 diff --git a/net/minecraft/world/entity/Entity.java b/net/minecraft/world/entity/Entity.java
-index 803fc4e94b897e5bb79d439e88f7a6e3347758c8..a3bd9f8a3c4a85538a4bd0513e2d99cf71d1bd28 100644
+index 3ec29ade9ce582fc47f46e10c98fa9aa72115419..d73e6b60d323768470aaf4b7c8f8931b8db63934 100644
 --- a/net/minecraft/world/entity/Entity.java
 +++ b/net/minecraft/world/entity/Entity.java
 @@ -3698,7 +3698,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
@@ -196,10 +196,10 @@ index 5ef7d826f159047e1482f4fb8a5ba85df9a1190b..06be294f16f92c9e53559cf031bbb824
  
      public int getFuse() {
 diff --git a/net/minecraft/world/entity/player/Player.java b/net/minecraft/world/entity/player/Player.java
-index 0a3edba62f97386e17e5174d0730f9e393b53578..4ff8a8f7326a5a9e2ac91a8b19b7eaf802fff18d 100644
+index 7c235675d594ab2938601dddf93318a9e9b18819..8a74bbe1e3cbefc70d96d36ef08268d1bbafc847 100644
 --- a/net/minecraft/world/entity/player/Player.java
 +++ b/net/minecraft/world/entity/player/Player.java
-@@ -729,7 +729,7 @@ public abstract class Player extends LivingEntity {
+@@ -741,7 +741,7 @@ public abstract class Player extends LivingEntity {
  
      public void increaseScore(int score) {
          int score1 = this.getScore();
