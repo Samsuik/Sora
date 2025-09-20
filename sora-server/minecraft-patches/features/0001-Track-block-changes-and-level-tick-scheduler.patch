@@ -5,10 +5,10 @@ Subject: [PATCH] Track block changes and level tick scheduler
 
 
 diff --git a/net/minecraft/server/MinecraftServer.java b/net/minecraft/server/MinecraftServer.java
-index 777c564c17ebbb79570894bc21633ceb4bcafdd2..ca2fb8c5d630deec503ae331442a7380dcf2bce0 100644
+index c6d6523ba68183e2319404dd0af85c040303ddc1..9b918f39a766cda74c79ef5eb9c466f357ba5990 100644
 --- a/net/minecraft/server/MinecraftServer.java
 +++ b/net/minecraft/server/MinecraftServer.java
-@@ -1786,6 +1786,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
+@@ -1787,6 +1787,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
              profilerFiller.pop();
              profilerFiller.pop();
              serverLevel.explosionDensityCache.clear(); // Paper - Optimize explosions
@@ -17,7 +17,7 @@ index 777c564c17ebbb79570894bc21633ceb4bcafdd2..ca2fb8c5d630deec503ae331442a7380
          this.isIteratingOverLevels = false; // Paper - Throw exception on world create while being ticked
  
 diff --git a/net/minecraft/world/level/Level.java b/net/minecraft/world/level/Level.java
-index 2996f75d755fbdb7d56fb1e29ebdf20103502f89..421b9c665b65f13707f4e653b79c2ab21f2e7ddc 100644
+index 294ac80bba15b5b89354830f44b5ebdf91956973..9a2225ead4f88985fc8d3da60e16447b2f284b1d 100644
 --- a/net/minecraft/world/level/Level.java
 +++ b/net/minecraft/world/level/Level.java
 @@ -868,6 +868,10 @@ public abstract class Level implements LevelAccessor, UUIDLookup<Entity>, AutoCl

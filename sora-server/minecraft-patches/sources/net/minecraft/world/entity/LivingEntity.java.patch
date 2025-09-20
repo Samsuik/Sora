@@ -201,7 +201,7 @@
              this.hurtServer(serverLevel, this.damageSources().drown(), 1.0F);
          }
  
-@@ -4290,6 +_,13 @@
+@@ -4306,6 +_,13 @@
          if (!this.isUsingItem()) {
              return null;
          } else {

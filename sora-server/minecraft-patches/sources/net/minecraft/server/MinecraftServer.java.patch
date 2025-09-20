@@ -37,7 +37,7 @@
      }
  
      private void readScoreboard(DimensionDataStorage dataStorage) {
-@@ -1248,6 +_,7 @@
+@@ -1249,6 +_,7 @@
                      final long diff = currentTime - tickSection;
                      final java.math.BigDecimal currentTps = TPS_BASE.divide(new java.math.BigDecimal(diff), 30, java.math.RoundingMode.HALF_UP);
                      tps5s.add(currentTps, diff); // Purpur - Add 5 second tps average in /tps
@@ -45,7 +45,7 @@
                      tps1.add(currentTps, diff);
                      tps5.add(currentTps, diff);
                      tps15.add(currentTps, diff);
-@@ -1289,6 +_,7 @@
+@@ -1290,6 +_,7 @@
                      // Paper end - rewrite chunk system
                      this.tickFrame.end();
                      profilerFiller.popPush("nextTickWait");
