@@ -5,11 +5,11 @@ Subject: [PATCH] Destroy Waterlogged Blocks
 
 
 diff --git a/net/minecraft/world/level/ServerExplosion.java b/net/minecraft/world/level/ServerExplosion.java
-index 17e0dc0a5563ff158766b2b5b57d7189646e009b..3a9d51a819e3fb604289107f1338d1d3ed5800f0 100644
+index adbbf7b4d59182ecfdd058962074acdbfde43755..2bacf4f15f811058f63e7255de3a7acb85a6f4b2 100644
 --- a/net/minecraft/world/level/ServerExplosion.java
 +++ b/net/minecraft/world/level/ServerExplosion.java
 @@ -399,6 +399,11 @@ public class ServerExplosion implements Explosion {
-             if (material != null && material.resistance() >= 0.0f && pos.getY() > this.level.getMinY() && (!this.level.sakuraConfig().cannons.explosion.requireTntToDamageDurableMaterials || this.source instanceof net.minecraft.world.entity.item.PrimedTnt)) {
+             if (material != null && material.resistance() >= 0.0f && pos.getY() > this.level.getMinY()) {
                  return Optional.of(material.resistance());
              }
 +            // Sakura start - destroy water logged blocks
