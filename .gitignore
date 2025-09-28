@@ -50,6 +50,7 @@ manifest.mf
 
 # other stuff
 run/
+run
 
 sora-api/build.gradle.kts
 sora-server/build.gradle.kts
