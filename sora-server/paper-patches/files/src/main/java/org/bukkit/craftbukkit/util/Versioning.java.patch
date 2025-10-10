@@ -5,7 +5,7 @@
          String result = "Unknown-Version";
  
 -        InputStream stream = Bukkit.class.getClassLoader().getResourceAsStream("META-INF/maven/org.purpurmc.purpur/purpur-api/pom.properties"); // Purpur - Rebrand
-+        InputStream stream = Bukkit.class.getClassLoader().getResourceAsStream("META-INF/maven/me.samsuik.sora/sakura-api/pom.properties"); // Sakura - branding changes
++        InputStream stream = Bukkit.class.getClassLoader().getResourceAsStream("META-INF/maven/me.samsuik.sora/sora-api/pom.properties"); // Sakura - branding changes
          Properties properties = new Properties();
  
          if (stream != null) {
