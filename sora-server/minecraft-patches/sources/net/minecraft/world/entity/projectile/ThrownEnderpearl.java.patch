@@ -1,6 +1,38 @@
 --- a/net/minecraft/world/entity/projectile/ThrownEnderpearl.java
 +++ b/net/minecraft/world/entity/projectile/ThrownEnderpearl.java
-@@ -118,6 +_,21 @@
+@@ -39,6 +_,31 @@
+         super(EntityType.ENDER_PEARL, owner, level, item);
+     }
+ 
++    // Sakura start - enderpearls use outline for collision
++    @Override
++    protected final net.minecraft.world.level.ClipContext.Block getClipType() {
++        return this.level().sakuraConfig().entity.enderPearl.useOutlineForCollision
++            ? net.minecraft.world.level.ClipContext.Block.OUTLINE
++            : super.getClipType();
++    }
++    // Sakura end - enderpearls use outline for collision
++    // Sakura start - configure enderpearls being slowed down by water
++    @Override
++    public final boolean isInWater() {
++        return super.isInWater() && this.level().sakuraConfig().entity.enderPearl.slowedDownByWater;
++    }
++    // Sakura end - configure enderpearls being slowed down by water
++    // Sakura start - configure enderpearls random spread
++    @Override
++    public final Vec3 getMovementToShoot(final double x, final double y, final double z, final float velocity, final float inaccuracy) {
++        final float randomness = this.level().sakuraConfig().entity.enderPearl.randomSpreadWhenThrown
++            ? inaccuracy
++            : 0.0f;
++        return super.getMovementToShoot(x, y, z, velocity, randomness);
++    }
++    // Sakura end - configure enderpearls random spread
++
++
+     @Override
+     public Item getDefaultItem() {
+         return Items.ENDER_PEARL;
+@@ -103,6 +_,21 @@
              if (owner != null && isAllowedToTeleportOwner(owner, serverLevel)) {
                  Vec3 vec3 = this.oldPosition();
                  if (owner instanceof ServerPlayer serverPlayer) {
@@ -22,7 +54,7 @@
                      if (serverPlayer.connection.isAcceptingMessages()) {
                          // CraftBukkit start
                          // Store pre teleportation position as the teleport has been moved up.
-@@ -164,6 +_,11 @@
+@@ -149,6 +_,11 @@
                      if (entity != null) {
                          entity.resetFallDistance();
                      }
@@ -34,17 +66,3 @@
  
                      this.playSound(serverLevel, vec3);
                  }
-@@ -182,6 +_,13 @@
-             return entity.canUsePortal(true);
-         }
-     }
-+
-+    // Sakura start - enderpearls use outline for collision
-+    @Override
-+    protected net.minecraft.world.level.ClipContext.Block getClipType() {
-+        return this.level().sakuraConfig().entity.enderPearl.useOutlineForCollision ? net.minecraft.world.level.ClipContext.Block.OUTLINE : super.getClipType();
-+    }
-+    // Sakura end - enderpearls use outline for collision
- 
-     @Override
-     public void tick() {

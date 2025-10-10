@@ -1,6 +1,6 @@
 --- a/net/minecraft/server/dedicated/DedicatedServer.java
 +++ b/net/minecraft/server/dedicated/DedicatedServer.java
-@@ -194,6 +_,11 @@
+@@ -287,6 +_,11 @@
          org.purpurmc.purpur.PurpurConfig.registerCommands();
          // Purpur end - Purpur config files
          com.destroystokyo.paper.VersionHistoryManager.INSTANCE.getClass(); // Paper - load version history now
@@ -10,5 +10,5 @@
 +        me.samsuik.sakura.command.SakuraCommands.registerCommands(this);
 +        // Sakura end - sakura configuration files
  
-         this.setPvpAllowed(properties.pvp);
-         this.setFlightAllowed(properties.allowFlight);
+         // this.worldData.setGameType(properties.gameMode.get()); // CraftBukkit - moved to world loading
+         LOGGER.info("Default game type: {}", properties.gameMode.get());

@@ -1,6 +1,14 @@
 --- a/purpur-api/build.gradle.kts
 +++ b/purpur-api/build.gradle.kts
-@@ -101,17 +_,21 @@
+@@ -67,6 +_,7 @@
+     api("org.apache.maven:maven-resolver-provider:3.9.6") // make API dependency for Paper Plugins
+     implementation("org.apache.maven.resolver:maven-resolver-connector-basic:1.9.18")
+     implementation("org.apache.maven.resolver:maven-resolver-transport-http:1.9.18")
++    compileOnly("org.spongepowered:configurate-yaml:4.2.0")
+ 
+     // Annotations - Slowly migrate to jspecify
+     val annotations = "org.jetbrains:annotations:$annotationsVersion"
+@@ -100,17 +_,21 @@
          java {
              srcDir(generatedDir)
              srcDir(file("../paper-api/src/main/java"))

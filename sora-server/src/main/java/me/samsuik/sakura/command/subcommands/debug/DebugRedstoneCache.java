@@ -1,7 +1,7 @@
 package me.samsuik.sakura.command.subcommands.debug;
 
 import me.samsuik.sakura.command.PlayerOnlySubCommand;
-import me.samsuik.sakura.redstone.RedstoneNetwork;
+import me.samsuik.sakura.redstone.cache.RedstoneNetwork;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
@@ -19,38 +19,40 @@ import java.util.concurrent.ThreadLocalRandom;
 
 @NullMarked
 public final class DebugRedstoneCache extends PlayerOnlySubCommand {
-    public DebugRedstoneCache(String name) {
+    public DebugRedstoneCache(final String name) {
         super(name);
     }
 
     @Override
-    public void execute(Player player, String[] args) {
-        ServerPlayer nmsPlayer = ((CraftPlayer) player).getHandle();
-        Level level = nmsPlayer.level();
-        Set<Location> locations = new HashSet<>();
-        for (RedstoneNetwork network : level.redstoneWireCache.getNetworkCache().values()) {
-            byte randomColour = (byte) ThreadLocalRandom.current().nextInt(16);
-            DyeColor dyeColour = DyeColor.getByWoolData(randomColour);
-            Material material = Material.matchMaterial(dyeColour.name() + "_WOOL");
+    public void execute(final Player player, final String[] args) {
+        final ServerPlayer nmsPlayer = ((CraftPlayer) player).getHandle();
+        final Level level = nmsPlayer.level();
+        final Set<Location> redstoneWires = new HashSet<>();
+
+        // Display randomly coloured wool blocks in place of redstone wires in a network.
+        for (final RedstoneNetwork network : level.redstoneWireCache.getNetworkCache().values()) {
+            final byte randomColour = (byte) ThreadLocalRandom.current().nextInt(16);
+            final DyeColor dyeColour = DyeColor.getByWoolData(randomColour);
+            final Material material = Material.matchMaterial(dyeColour.name() + "_WOOL");
 
             if (!network.isRegistered()) {
                 continue;
             }
 
-            for (BlockPos pos : network.getWirePositions()) {
-                Location location = CraftLocation.toBukkit(pos, level);
+            for (final BlockPos pos : network.getWirePositions()) {
+                final Location location = CraftLocation.toBukkit(pos, level);
                 if (player.getLocation().distance(location) >= 64.0) {
                     continue;
                 }
                 player.sendBlockChange(location, material.createBlockData());
-                locations.add(location);
+                redstoneWires.add(location);
             }
         }
 
-        player.sendRichMessage("<red>Displaying %dx cached redstone wires".formatted(locations.size()));
+        player.sendRichMessage("<red>Displaying %dx cached redstone wires".formatted(redstoneWires.size()));
 
-        level.levelTickScheduler.delayedTask(() -> {
-            for (Location loc : locations) {
+        level.levelTickScheduler.runTaskLater(() -> {
+            for (final Location loc : redstoneWires) {
                 player.sendBlockChange(loc, loc.getBlock().getBlockData());
             }
         }, 1200);

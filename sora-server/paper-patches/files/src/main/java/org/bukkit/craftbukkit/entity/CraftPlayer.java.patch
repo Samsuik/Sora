@@ -1,18 +1,18 @@
 --- a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
-@@ -237,6 +_,18 @@
+@@ -244,6 +_,18 @@
          this.firstPlayed = System.currentTimeMillis();
      }
  
 +    // Sakura start - entity tracking range modifier
 +    @Override
-+    public double getTrackingRangeModifier() {
++    public final double getTrackingRangeModifier() {
 +        return this.getHandle().trackingRangeModifier * 100.0;
 +    }
 +
 +    @Override
-+    public void setTrackingRangeModifier(double mod) {
-+        this.getHandle().trackingRangeModifier = mod / 100.0;
++    public final void setTrackingRangeModifier(final double modifier) {
++        this.getHandle().trackingRangeModifier = modifier / 100.0;
 +    }
 +    // Sakura end - entity tracking range modifier
 +

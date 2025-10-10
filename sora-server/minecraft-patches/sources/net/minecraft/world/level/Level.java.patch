@@ -1,15 +1,15 @@
 --- a/net/minecraft/world/level/Level.java
 +++ b/net/minecraft/world/level/Level.java
-@@ -109,7 +_,7 @@
+@@ -114,7 +_,7 @@
      public final List<TickingBlockEntity> blockEntityTickers = Lists.newArrayList();
-     public final NeighborUpdater neighborUpdater;
+     public final CollectingNeighborUpdater neighborUpdater;
      private final List<TickingBlockEntity> pendingBlockEntityTickers = Lists.newArrayList();
 -    private boolean tickingBlockEntities;
 +    public boolean tickingBlockEntities;
      public final Thread thread;
      private final boolean isDebug;
      private int skyDarken;
-@@ -159,6 +_,18 @@
+@@ -164,6 +_,18 @@
          return this.paperConfig;
      }
      // Paper end - add paper world config
@@ -19,16 +19,16 @@
 +        return this.sakuraConfig;
 +    }
 +    // Sakura end - sakura configuration files
-+    // Sakura start - local config and property storage
-+    private final me.samsuik.sakura.configuration.local.LocalConfigManager localConfig = new me.samsuik.sakura.configuration.local.LocalConfigManager(this);
-+    public final me.samsuik.sakura.configuration.local.LocalConfigManager localConfig() {
++    // Sakura start - local config api
++    private final me.samsuik.sakura.configuration.local.LocalConfiguration localConfig = new me.samsuik.sakura.configuration.local.LocalConfiguration(this);
++    public final me.samsuik.sakura.configuration.local.LocalConfiguration localConfig() {
 +        return this.localConfig;
 +    }
-+    // Sakura end - local config and property storage
++    // Sakura end - local config api
  
      public final org.purpurmc.purpur.PurpurWorldConfig purpurConfig; // Purpur - Purpur config files
      public static @Nullable BlockPos lastPhysicsProblem; // Spigot
-@@ -871,6 +_,7 @@
+@@ -876,6 +_,7 @@
          org.bukkit.World.Environment environment, // Paper
          java.util.function.Function<org.spigotmc.SpigotWorldConfig, // Spigot - create per world config
          io.papermc.paper.configuration.WorldConfiguration> paperWorldConfigCreator, // Paper - create paper world config
@@ -36,7 +36,7 @@
          java.util.concurrent.Executor executor // Paper - Anti-Xray
      ) {
          // Paper start - getblock optimisations - cache world height/sections
-@@ -886,6 +_,7 @@
+@@ -891,6 +_,7 @@
          this.paperConfig = paperWorldConfigCreator.apply(this.spigotConfig); // Paper - create paper world config
          this.purpurConfig = new org.purpurmc.purpur.PurpurWorldConfig(((net.minecraft.world.level.storage.PrimaryLevelData) levelData).getLevelName(), environment); // Purpur - Purpur config files
          this.playerBreedingCooldowns = this.getNewBreedingCooldownCache(); // Purpur - Add adjustable breeding cooldown to config

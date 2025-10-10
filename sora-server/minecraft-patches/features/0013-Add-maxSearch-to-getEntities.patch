@@ -5,7 +5,7 @@ Subject: [PATCH] Add maxSearch to getEntities
 
 
 diff --git a/ca/spottedleaf/moonrise/patches/chunk_system/level/entity/ChunkEntitySlices.java b/ca/spottedleaf/moonrise/patches/chunk_system/level/entity/ChunkEntitySlices.java
-index bd2055bc89c5672b514f1f7b1ad320a2fba7cbe2..7678696aa2fa74358a374a501a6b7f76f4805945 100644
+index 8df264c86ab14f4e7aa9918a3341ef35ffaa5290..9d90db0c55df85ac26c91b42fb9e72baad940e8f 100644
 --- a/ca/spottedleaf/moonrise/patches/chunk_system/level/entity/ChunkEntitySlices.java
 +++ b/ca/spottedleaf/moonrise/patches/chunk_system/level/entity/ChunkEntitySlices.java
 @@ -336,7 +336,14 @@ public final class ChunkEntitySlices {
@@ -83,10 +83,10 @@ index 2d24d03bbdb5ee0d862cbfff2219f58afffafe12..1bf06038d51efcc103fad23670686c30
                          }
                      }
 diff --git a/net/minecraft/world/level/Level.java b/net/minecraft/world/level/Level.java
-index cce1bf53eb2f3477bc8a246cd4578cf7753af764..67580a9d2ee5fa819a55e1b45372e1515560e871 100644
+index 54f96e0ef6e58567874cc81bdea67249da4511b0..b01bde39fa98b40761b137ec46bab7ebd6686c59 100644
 --- a/net/minecraft/world/level/Level.java
 +++ b/net/minecraft/world/level/Level.java
-@@ -1818,10 +1818,18 @@ public abstract class Level implements LevelAccessor, UUIDLookup<Entity>, AutoCl
+@@ -1774,10 +1774,18 @@ public abstract class Level implements LevelAccessor, AutoCloseable, ca.spottedl
          this.getEntities(entityTypeTest, bounds, predicate, output, Integer.MAX_VALUE);
      }
  
@@ -106,7 +106,7 @@ index cce1bf53eb2f3477bc8a246cd4578cf7753af764..67580a9d2ee5fa819a55e1b45372e151
          Profiler.get().incrementCounter("getEntities");
  
          if (entityTypeTest instanceof net.minecraft.world.entity.EntityType<T> byType) {
-@@ -1838,7 +1846,7 @@ public abstract class Level implements LevelAccessor, UUIDLookup<Entity>, AutoCl
+@@ -1794,7 +1802,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable, ca.spottedl
  
          if (entityTypeTest == null) {
              if (maxCount != Integer.MAX_VALUE) {

@@ -1,27 +1,35 @@
 package me.samsuik.sakura.player.item;
 
 import me.samsuik.sakura.configuration.GlobalConfiguration;
+import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.component.PatchedDataComponentMap;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.NullMarked;
 
 @NullMarked
 public final class MilkBucketItem extends Item {
-    public MilkBucketItem(Properties properties) {
+    public MilkBucketItem(final Properties properties) {
         super(properties);
     }
 
     @Override
-    public void verifyComponentsAfterLoad(ItemStack stack) {
-        int maxStackSize = DataComponentHelper.bucketMaxStackSize();
-        if (maxStackSize > 0 && maxStackSize < 100 && stackableMilkBuckets()) {
-            stack.set(DataComponents.MAX_STACK_SIZE, maxStackSize);
+    public DataComponentMap components() {
+        final DataComponentMap components = super.components();
+        return stackableMilkBuckets()
+            ? DataComponentHelper.updateBucketMaxStackSize(components)
+            : components;
+    }
+
+    @Override
+    public void modifyComponentsSentToClient(final PatchedDataComponentMap components) {
+        if (stackableMilkBuckets()) {
+            components.set(DataComponents.MAX_STACK_SIZE, DataComponentHelper.bucketMaxStackSize());
         }
     }
 
     private static boolean stackableMilkBuckets() {
-        GlobalConfiguration config = GlobalConfiguration.get();
+        final GlobalConfiguration config = GlobalConfiguration.get();
         return config != null && config.players.stackableMilkBuckets;
     }
 }

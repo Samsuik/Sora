@@ -5,10 +5,10 @@ Subject: [PATCH] Allow explosions to destroy lava
 
 
 diff --git a/net/minecraft/world/level/ServerExplosion.java b/net/minecraft/world/level/ServerExplosion.java
-index 06993303103dcd7241cbd4ecc9d24b981b2d2118..6df8775b020d329b6b4512f9476c3c3dbd08b4c5 100644
+index a24e728476a64e49f2e5139fc103e19d5650d6e1..8317c1d8ede33a1de115c5597a439f30284c8b86 100644
 --- a/net/minecraft/world/level/ServerExplosion.java
 +++ b/net/minecraft/world/level/ServerExplosion.java
-@@ -404,6 +404,11 @@ public class ServerExplosion implements Explosion {
+@@ -373,6 +373,11 @@ public class ServerExplosion implements Explosion {
                  return Optional.of(ZERO_RESISTANCE);
              }
              // Sakura end - destroy water logged blocks
@@ -21,10 +21,10 @@ index 06993303103dcd7241cbd4ecc9d24b981b2d2118..6df8775b020d329b6b4512f9476c3c3d
  
          return this.damageCalculator.getBlockExplosionResistance(this, this.level, pos, blockState, fluidState);
 diff --git a/net/minecraft/world/level/block/state/BlockBehaviour.java b/net/minecraft/world/level/block/state/BlockBehaviour.java
-index 8db95b74f88f8096de93115ae8d3fb2e6184ad3b..67ee0608e6ba08b7ff9931aec8b835870b813ce0 100644
+index dff1c4fa389d5168bd9ec1aff4c7e4bc63c4110e..7ee94845b69139f7c419b9d6ee24ba1db0e69975 100644
 --- a/net/minecraft/world/level/block/state/BlockBehaviour.java
 +++ b/net/minecraft/world/level/block/state/BlockBehaviour.java
-@@ -201,7 +201,7 @@ public abstract class BlockBehaviour implements FeatureElement {
+@@ -200,7 +200,7 @@ public abstract class BlockBehaviour implements FeatureElement {
                  state.getDrops(builder).forEach(stack -> dropConsumer.accept(stack, pos));
              }
  

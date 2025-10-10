@@ -123,10 +123,10 @@ index f1ab0e66e7d464f7f31a7a360528ed97cdda0aa0..4aed59c3038cb4af7e454a0dd8455488
          public DataItem(EntityDataAccessor<T> accessor, T value) {
              this.accessor = accessor;
 diff --git a/net/minecraft/server/level/ServerEntity.java b/net/minecraft/server/level/ServerEntity.java
-index e96d4dee14c05f2fa329bfb1588ec795d4e3d730..ba9393e474ae213316c693d73ef2641e69eae8cc 100644
+index 638432a2e6506d3db6a25c068a33eeafb13cf0d6..c386288e808e97c938f1909d81ebfa0032dec2a6 100644
 --- a/net/minecraft/server/level/ServerEntity.java
 +++ b/net/minecraft/server/level/ServerEntity.java
-@@ -148,7 +148,7 @@ public class ServerEntity {
+@@ -136,7 +136,7 @@ public class ServerEntity {
              this.sendDirtyEntityData();
          }
  
@@ -135,28 +135,28 @@ index e96d4dee14c05f2fa329bfb1588ec795d4e3d730..ba9393e474ae213316c693d73ef2641e
              byte b = Mth.packDegrees(this.entity.getYRot());
              byte b1 = Mth.packDegrees(this.entity.getXRot());
              boolean flag = Math.abs(b - this.lastSentYRot) >= 1 || Math.abs(b1 - this.lastSentXRot) >= 1;
-@@ -411,7 +411,15 @@ public class ServerEntity {
+@@ -392,7 +392,15 @@ public class ServerEntity {
          List<SynchedEntityData.DataValue<?>> list = entityData.packDirty();
          if (list != null) {
              this.trackedDataValues = entityData.getNonDefaultValues();
--            this.broadcastAndSend(new ClientboundSetEntityDataPacket(this.entity.getId(), list));
+-            this.synchronizer.sendToTrackingPlayersAndSelf(new ClientboundSetEntityDataPacket(this.entity.getId(), list));
 +            // Slice start - packet obfuscation and reduction
 +            if (!(this.entity instanceof ServerPlayer)) {
 +                list = entityData.packForeignDirty(list);
 +            }
 +
 +            if (list != null) {
-+                this.broadcastAndSend(new ClientboundSetEntityDataPacket(this.entity.getId(), list));
++                this.synchronizer.sendToTrackingPlayersAndSelf(new ClientboundSetEntityDataPacket(this.entity.getId(), list));
 +            }
 +            // Slice end - packet obfuscation and reduction
          }
  
          if (this.entity instanceof LivingEntity) {
 diff --git a/net/minecraft/world/entity/Entity.java b/net/minecraft/world/entity/Entity.java
-index 9c626e1ef6afd638db1ea7c753be920104c0ff5a..c85c365717d017dd0d4976af859a7fa6facdf2af 100644
+index 96fa112b14ac8346df29d2938db6229453f2c249..dada54ab9db4ac0b933825dd85c1386a535ea4a4 100644
 --- a/net/minecraft/world/entity/Entity.java
 +++ b/net/minecraft/world/entity/Entity.java
-@@ -3698,7 +3698,7 @@ public abstract class Entity implements SyncedDataHolder, Nameable, EntityAccess
+@@ -3768,7 +3768,7 @@ public abstract class Entity implements SyncedDataHolder, DebugValueSource, Name
              this.entityData.markDirty(Entity.DATA_AIR_SUPPLY_ID);
              return;
          }
@@ -166,10 +166,10 @@ index 9c626e1ef6afd638db1ea7c753be920104c0ff5a..c85c365717d017dd0d4976af859a7fa6
      }
  
 diff --git a/net/minecraft/world/entity/item/FallingBlockEntity.java b/net/minecraft/world/entity/item/FallingBlockEntity.java
-index e4dce2b09e8e898166b355373e6a205ebeb53a25..860efa7bf6643ab9f05e97fefec280dffa76ba0e 100644
+index 44f04d0a6b1a47fa152f955a22cc8b8f1d2b3348..59aa539b7d830de48ff582b0da6fa17796b8c4b8 100644
 --- a/net/minecraft/world/entity/item/FallingBlockEntity.java
 +++ b/net/minecraft/world/entity/item/FallingBlockEntity.java
-@@ -145,7 +145,7 @@ public class FallingBlockEntity extends Entity {
+@@ -144,7 +144,7 @@ public class FallingBlockEntity extends Entity {
      }
  
      public void setStartPos(BlockPos startPos) {
@@ -179,7 +179,7 @@ index e4dce2b09e8e898166b355373e6a205ebeb53a25..860efa7bf6643ab9f05e97fefec280df
  
      public BlockPos getStartPos() {
 diff --git a/net/minecraft/world/entity/item/PrimedTnt.java b/net/minecraft/world/entity/item/PrimedTnt.java
-index 5ef7d826f159047e1482f4fb8a5ba85df9a1190b..06be294f16f92c9e53559cf031bbb824e36ba97d 100644
+index a0be8d416238948ddaa4d3f2994983f0c5ecc409..d55da92cc33c68d45ded775e14ca8d16e387e2a7 100644
 --- a/net/minecraft/world/entity/item/PrimedTnt.java
 +++ b/net/minecraft/world/entity/item/PrimedTnt.java
 @@ -228,7 +228,11 @@ public class PrimedTnt extends Entity implements TraceableEntity {
@@ -196,10 +196,10 @@ index 5ef7d826f159047e1482f4fb8a5ba85df9a1190b..06be294f16f92c9e53559cf031bbb824
  
      public int getFuse() {
 diff --git a/net/minecraft/world/entity/player/Player.java b/net/minecraft/world/entity/player/Player.java
-index 0a60f5434ea514861c5415d7417645ec244fd82d..a2824fea73a6b617c35f0b98ff6950694fb03dd8 100644
+index 12320c5216eb9f9305e5c68342b5a043fe3e6956..4bc6c74f1ba7b3bea8ef90306a86bbf6bc8be651 100644
 --- a/net/minecraft/world/entity/player/Player.java
 +++ b/net/minecraft/world/entity/player/Player.java
-@@ -748,7 +748,7 @@ public abstract class Player extends LivingEntity {
+@@ -620,7 +620,7 @@ public abstract class Player extends Avatar implements ContainerUser {
  
      public void increaseScore(int score) {
          int score1 = this.getScore();

@@ -4,6 +4,9 @@ import com.mojang.logging.LogUtils;
 import io.papermc.paper.configuration.Configuration;
 import io.papermc.paper.configuration.ConfigurationPart;
 import io.papermc.paper.configuration.type.number.IntOr;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.Material;
 import org.slf4j.Logger;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
@@ -29,14 +32,30 @@ public final class GlobalConfiguration extends ConfigurationPart {
 
     public Messages messages;
     public class Messages extends ConfigurationPart {
-        public String durableBlockInteraction = "<dark_gray>(<aqua>S</aqua>) <white>This block has <gray><remaining></gray> of <gray><durability>";
-        public String fpsSettingChange = "<dark_gray>(<aqua>S</aqua>) <gray><state> <green><name>";
+        public String durableBlockInteraction = "<dark_gray>(<light_purple>S</light_purple>) <white>This block has <gray><remaining></gray> of <gray><durability>";
+        public String fpsSettingChange = "<dark_gray>(<light_purple>S</light_purple>) <gray><state> <yellow><name>";
         public boolean tpsShowEntityAndChunkCount = true;
+
+        public Component fpsSettingChangeComponent(final String name, final String state) {
+            return MiniMessage.miniMessage().deserialize(
+                this.fpsSettingChange,
+                Placeholder.unparsed("name", name),
+                Placeholder.unparsed("state", state)
+            );
+        }
+
+        public Component durableBlockInteractionComponent(final int remaining, final int durability) {
+            return MiniMessage.miniMessage().deserialize(
+                this.durableBlockInteraction,
+                Placeholder.unparsed("remaining", String.valueOf(remaining)),
+                Placeholder.unparsed("durability", String.valueOf(durability))
+            );
+        }
     }
 
     public Fps fps;
     public class Fps extends ConfigurationPart {
-        public Material material = Material.LIGHT_BLUE_STAINED_GLASS_PANE;
+        public Material material = Material.PINK_STAINED_GLASS_PANE;
     }
 
     public Players players;
@@ -48,6 +67,7 @@ public final class GlobalConfiguration extends ConfigurationPart {
 
         public IntOr.Default bucketStackSize = IntOr.Default.USE_DEFAULT;
         public boolean stackableMilkBuckets = false;
+        public boolean stackablePowderedSnowBuckets = false;
     }
 
     public Environment environment;

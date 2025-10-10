@@ -5,29 +5,28 @@ Subject: [PATCH] Explosion Durable Blocks
 
 
 diff --git a/net/minecraft/world/item/BlockItem.java b/net/minecraft/world/item/BlockItem.java
-index 3dbdb5c30f8af89e768016bb683a4d2c1549aa0e..b8148d6158cb26a6bd68f8c61254e14d4c033283 100644
+index 5820129341698ce98d8edfb4673321e9e415c969..684c1f2bf36c1fd8ae6b6acc38566d9476401368 100644
 --- a/net/minecraft/world/item/BlockItem.java
 +++ b/net/minecraft/world/item/BlockItem.java
-@@ -38,8 +38,31 @@ public class BlockItem extends Item {
+@@ -37,8 +37,30 @@ public class BlockItem extends Item {
          this.block = block;
      }
  
 +    // Sakura start - explosion durable blocks
-+    private void sendBlockDurabilityToPlayer(UseOnContext context) {
-+        Player player = context.getPlayer();
-+        BlockState state = context.getLevel().getBlockState(context.getClickedPos());
-+        Block block = state.getBlock();
-+        me.samsuik.sakura.explosion.durable.DurableMaterial material = context.getLevel().localConfig().config(context.getClickedPos()).durableMaterials.get(block);
++    private void sendBlockDurabilityToPlayer(final UseOnContext context) {
++        final Player player = context.getPlayer();
++        final Level level = context.getLevel();
++        final BlockPos clickedPos = context.getClickedPos();
++
++        // If the clicked block is a durable material then send the durability to the player
++        final BlockState state = level.getBlockState(clickedPos);
++        final Block clickedBlock = state.getBlock();
++        final me.samsuik.sakura.explosion.durable.DurableMaterial material = level.localConfig().at(clickedPos).durableMaterials.get(clickedBlock);
 +
 +        if (material != null) {
-+            int remaining = context.getLevel().durabilityManager.durability(context.getClickedPos(), material);
-+            int durability = material.durability();
-+
-+            player.getBukkitEntity().sendRichMessage(
-+                me.samsuik.sakura.configuration.GlobalConfiguration.get().messages.durableBlockInteraction,
-+                net.kyori.adventure.text.minimessage.tag.resolver.Placeholder.unparsed("remaining", String.valueOf(remaining)),
-+                net.kyori.adventure.text.minimessage.tag.resolver.Placeholder.unparsed("durability", String.valueOf(durability))
-+            );
++            final int remaining = context.getLevel().durabilityManager.durability(clickedPos, material);
++            final int durability = material.durability();
++            player.getBukkitEntity().sendMessage(me.samsuik.sakura.configuration.GlobalConfiguration.get().messages.durableBlockInteractionComponent(remaining, durability));
 +        }
 +    }
 +
@@ -41,22 +40,22 @@ index 3dbdb5c30f8af89e768016bb683a4d2c1549aa0e..b8148d6158cb26a6bd68f8c61254e14d
          return !interactionResult.consumesAction() && context.getItemInHand().has(DataComponents.CONSUMABLE)
              ? super.use(context.getLevel(), context.getPlayer(), context.getHand())
 diff --git a/net/minecraft/world/level/Level.java b/net/minecraft/world/level/Level.java
-index 9fb2ea3e1f9df1e72e9dddfe4a344ab644134d12..121aece7f77b2c3b4b7bd246e4716d0989a7d8ee 100644
+index b01bde39fa98b40761b137ec46bab7ebd6686c59..da9d09a4a37152b3c5ae22d107246c6f3162ae67 100644
 --- a/net/minecraft/world/level/Level.java
 +++ b/net/minecraft/world/level/Level.java
-@@ -874,6 +874,7 @@ public abstract class Level implements LevelAccessor, UUIDLookup<Entity>, AutoCl
+@@ -879,6 +879,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable, ca.spottedl
      // Sakura end - track block changes and tick scheduler
      public final me.samsuik.sakura.entity.merge.EntityMergeHandler mergeHandler = new me.samsuik.sakura.entity.merge.EntityMergeHandler(); // Sakura - merge cannon entities
-     public final me.samsuik.sakura.explosion.density.BlockDensityCache densityCache = new me.samsuik.sakura.explosion.density.BlockDensityCache(); // Sakura - explosion density cache
+     public final me.samsuik.sakura.explosion.density.BlockDensityCache densityCache = new me.samsuik.sakura.explosion.density.BlockDensityCache(this); // Sakura - optimise explosion density cache
 +    public final me.samsuik.sakura.explosion.durable.DurableBlockManager durabilityManager = new me.samsuik.sakura.explosion.durable.DurableBlockManager(); // Sakura - explosion durable blocks
  
      protected Level(
          WritableLevelData levelData,
 diff --git a/net/minecraft/world/level/ServerExplosion.java b/net/minecraft/world/level/ServerExplosion.java
-index db1f7659e6b0c143c0c5a70c9b07b44dd0a69417..adbbf7b4d59182ecfdd058962074acdbfde43755 100644
+index 7cb31c385869a403facce9abff627b12948bc342..b44957d7cd0af6e017607659cb44be195022bbaa 100644
 --- a/net/minecraft/world/level/ServerExplosion.java
 +++ b/net/minecraft/world/level/ServerExplosion.java
-@@ -131,7 +131,7 @@ public class ServerExplosion implements Explosion {
+@@ -133,7 +133,7 @@ public class ServerExplosion implements Explosion {
              BlockState blockState = ((ca.spottedleaf.moonrise.patches.getblock.GetBlockChunk)chunk).moonrise$getBlock(x, y, z);
              FluidState fluidState = blockState.getFluidState();
  
@@ -65,17 +64,17 @@ index db1f7659e6b0c143c0c5a70c9b07b44dd0a69417..adbbf7b4d59182ecfdd058962074acdb
  
              ret = new ca.spottedleaf.moonrise.patches.collisions.ExplosionBlockCache(
                      key, pos, blockState, fluidState,
-@@ -390,6 +390,20 @@ public class ServerExplosion implements Explosion {
-         // Paper end - collision optimisations
+@@ -359,6 +359,20 @@ public class ServerExplosion implements Explosion {
+         }
      }
      // Sakura end - specialised explosions
 +    // Sakura start - explosion durable blocks
-+    private Optional<Float> calculateBlockResistance(BlockState blockState, FluidState fluidState, BlockPos pos) {
++    private Optional<Float> calculateBlockResistance(final BlockState blockState, final FluidState fluidState, final BlockPos pos) {
 +        if (!blockState.isAir()) {
 +            final Block block = blockState.getBlock();
-+            final me.samsuik.sakura.explosion.durable.DurableMaterial material = this.level.localConfig().config(pos).durableMaterials.get(block);
++            final me.samsuik.sakura.explosion.durable.DurableMaterial material = this.level.localConfig().at(pos).durableMaterials.get(block);
 +
-+            if (material != null && material.resistance() >= 0.0f && pos.getY() > this.level.getMinY()) {
++            if (material != null && material.replaceBlastResistance() && pos.getY() > this.level.getMinY()) {
 +                return Optional.of(material.resistance());
 +            }
 +        }
@@ -86,13 +85,13 @@ index db1f7659e6b0c143c0c5a70c9b07b44dd0a69417..adbbf7b4d59182ecfdd058962074acdb
  
      public ServerExplosion(
          ServerLevel level,
-@@ -770,6 +784,14 @@ public class ServerExplosion implements Explosion {
+@@ -697,6 +711,14 @@ public class ServerExplosion implements Explosion {
                  }
              }
              // CraftBukkit end
 +            // Sakura start - explosion durable blocks
-+            final me.samsuik.sakura.explosion.durable.DurableMaterial material = this.level.localConfig().config(blockPos).durableMaterials.get(block);
-+            if (material != null && material.durability() >= 0) { // if durability is < 0 then only altar the blast resistance
++            final me.samsuik.sakura.explosion.durable.DurableMaterial material = this.level.localConfig().at(blockPos).durableMaterials.get(block);
++            if (material != null && material.applyDurability()) { // if durability is < 0 then only altar the blast resistance
 +                if (material.onlyDamagedByTnt() && !(this.source instanceof PrimedTnt) || !this.level.durabilityManager.damage(blockPos, material)) {
 +                    continue;
 +                }

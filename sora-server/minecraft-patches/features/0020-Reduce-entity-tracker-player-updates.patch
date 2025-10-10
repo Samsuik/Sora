@@ -5,10 +5,10 @@ Subject: [PATCH] Reduce entity tracker player updates
 
 
 diff --git a/net/minecraft/server/level/ChunkMap.java b/net/minecraft/server/level/ChunkMap.java
-index a88184f63f3cb539569942c5c982193973183984..95aa4015424db672cf8fd908a198ff9912d4765d 100644
+index f9dfbf11a39573e839153fd5d72bcf9019540359..747885dd0e8aaefecf600ebef33bb2e136f65290 100644
 --- a/net/minecraft/server/level/ChunkMap.java
 +++ b/net/minecraft/server/level/ChunkMap.java
-@@ -1015,7 +1015,11 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
+@@ -1023,7 +1023,11 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
              if (tracker == null) {
                  continue;
              }
@@ -21,7 +21,7 @@ index a88184f63f3cb539569942c5c982193973183984..95aa4015424db672cf8fd908a198ff99
              if (((ca.spottedleaf.moonrise.patches.entity_tracker.EntityTrackerTrackedEntity)tracker).moonrise$hasPlayers()
                  || ((ca.spottedleaf.moonrise.patches.chunk_system.entity.ChunkSystemEntity)entity).moonrise$getChunkStatus().isOrAfter(FullChunkStatus.ENTITY_TICKING)) {
                  tracker.serverEntity.sendChanges();
-@@ -1259,12 +1263,30 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
+@@ -1296,12 +1300,30 @@ public class ChunkMap extends ChunkStorage implements ChunkHolder.PlayerProvider
              return state != me.samsuik.sakura.player.visibility.VisibilityState.OFF;
          }
          // Sakura end - client visibility settings; entity visibility
@@ -30,7 +30,7 @@ index a88184f63f3cb539569942c5c982193973183984..95aa4015424db672cf8fd908a198ff99
 +        private net.minecraft.world.phys.Vec3 entityPosition;
 +
 +        public final boolean shouldUpdatePlayers() {
-+            // We have to always update players otherwise they can turn invisible on teleports (why?)
++            // Always update players otherwise they sometimes turn invisible when teleporting
 +            if (this.entity instanceof net.minecraft.world.entity.player.Player || this.entity.tickCount % this.playerUpdateInterval == 0) {
 +                return true;
 +            }
@@ -41,14 +41,14 @@ index a88184f63f3cb539569942c5c982193973183984..95aa4015424db672cf8fd908a198ff99
 +        // Sakura start - reduce entity tracker player updates
  
          public TrackedEntity(final Entity entity, final int range, final int updateInterval, final boolean trackDelta) {
-             this.serverEntity = new ServerEntity(ChunkMap.this.level, entity, updateInterval, trackDelta, this::broadcast, this::broadcastIgnorePlayers, this.seenBy); // Paper
+             this.serverEntity = new ServerEntity(ChunkMap.this.level, entity, updateInterval, trackDelta, this, this.seenBy); // Paper
              this.entity = entity;
              this.range = range;
              this.lastSectionPos = SectionPos.of(entity);
 +            // Sakura start - reduce entity tracker player updates
 +            this.playerUpdateInterval = Math.min(updateInterval, 20);
 +            this.entityPosition = entity.position();
-+            // Sakura start - reduce entity tracker player updates
++            // Sakura end - reduce entity tracker player updates
          }
  
          @Override

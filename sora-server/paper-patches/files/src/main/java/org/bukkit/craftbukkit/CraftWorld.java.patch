@@ -1,15 +1,15 @@
 --- a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
-@@ -294,6 +_,12 @@
+@@ -295,6 +_,12 @@
          ).isValid();
      }
      // Paper end
-+    // Sakura start - local config and property storage
++    // Sakura start - local config api
 +    @Override
-+    public final me.samsuik.sakura.local.storage.LocalStorageHandler getStorageHandler() {
++    public final me.samsuik.sakura.configuration.local.LocalConfigurationAccessor localConfig() {
 +        return this.getHandle().localConfig();
 +    }
-+    // Sakura end - local config and property storage
++    // Sakura end - local config api
  
      private static final Random rand = new Random();
  

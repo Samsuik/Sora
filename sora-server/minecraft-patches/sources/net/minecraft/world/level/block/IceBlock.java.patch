@@ -5,7 +5,7 @@
          // Paper end - Improve Block#breakNaturally API
          if (!EnchantmentHelper.hasTag(stack, EnchantmentTags.PREVENTS_ICE_MELTING)) {
 -            if (level.isNether() || (level.isTheEnd() && !org.purpurmc.purpur.PurpurConfig.allowWaterPlacementInTheEnd)) { // Purpur - Add allow water in end world option
-+            if (level.isNether() && !level.sakuraConfig().environment.allowWaterInTheNether || (level.isTheEnd() && !org.purpurmc.purpur.PurpurConfig.allowWaterPlacementInTheEnd)) { // Sakura - allow water in the nether // Purpur - Add allow water in end world option
++            if (!level.sakuraConfig().environment.allowWaterInTheNether && level.dimensionType().ultraWarm()) { // Sakura - allow water in the nether
                  level.removeBlock(pos, false);
                  return;
              }
@@ -14,7 +14,7 @@
          }
          // CraftBukkit end
 -        if (level.isNether() || (level.isTheEnd() && !org.purpurmc.purpur.PurpurConfig.allowWaterPlacementInTheEnd)) { // Purpur - Add allow water in end world option
-+        if (level.isNether() && !level.sakuraConfig().environment.allowWaterInTheNether || (level.isTheEnd() && !org.purpurmc.purpur.PurpurConfig.allowWaterPlacementInTheEnd)) { // Sakura - allow water in the nether // Purpur - Add allow water in end world option
++        if (!level.sakuraConfig().environment.allowWaterInTheNether && level.dimensionType().ultraWarm()) { // Sakura - allow water in the nether
              level.removeBlock(pos, false);
          } else {
              level.setBlockAndUpdate(pos, meltsInto());

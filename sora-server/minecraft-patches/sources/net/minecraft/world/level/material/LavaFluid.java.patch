@@ -1,18 +1,18 @@
 --- a/net/minecraft/world/level/material/LavaFluid.java
 +++ b/net/minecraft/world/level/material/LavaFluid.java
-@@ -189,12 +_,20 @@
+@@ -190,12 +_,20 @@
  
      @Override
      public int getTickDelay(LevelReader level) {
 -        return level.dimensionType().ultraWarm() ? level.getWorldBorder().world.purpurConfig.lavaSpeedNether : level.getWorldBorder().world.purpurConfig.lavaSpeedNotNether; // Purpur - Make lava flow speed configurable
 -    }
-+        return level.dimensionType().ultraWarm() && !level.getWorldBorder().world.sakuraConfig().environment.disableFastNetherLava ? level.getWorldBorder().world.purpurConfig.lavaSpeedNether : level.getWorldBorder().world.purpurConfig.lavaSpeedNotNether; // Sakura - configure fast nether lava // Purpur - Make lava flow speed configurable
++        return level.dimensionType().ultraWarm() && !(level instanceof Level gameLevel && gameLevel.sakuraConfig().environment.disableFastNetherLava) ? 10 : 30; // Sakura - configure fast nether lava
 +    }
 +
 +    // Sakura start - lava flow speed api
 +    @Override
-+    public final int getTickDelay(Level world, BlockPos pos) {
-+        final int flowSpeed = world.localConfig().config(pos).lavaFlowSpeed;
++    public final int getTickDelay(final Level world, final BlockPos pos) {
++        final int flowSpeed = world.localConfig().at(pos).lavaFlowSpeed;
 +        return flowSpeed >= 0 ? flowSpeed : this.getTickDelay(world);
 +    }
 +    // Sakura end - lava flow speed api
