@@ -17,12 +17,3 @@
      }
  
      public static double getViewScale() {
-@@ -5432,7 +_,7 @@
-         void accept(Entity entity, double x, double y, double z);
-     }
- 
--    record Movement(Vec3 from, Vec3 to, Optional<Vec3> axisDependentOriginalMovement) {
-+    public record Movement(Vec3 from, Vec3 to, Optional<Vec3> axisDependentOriginalMovement) {
-         public Movement(Vec3 from, Vec3 to, Vec3 axisDependentOriginalMovement) {
-             this(from, to, Optional.of(axisDependentOriginalMovement));
-         }
