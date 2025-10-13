@@ -5,10 +5,10 @@ Subject: [PATCH] Track block changes and level tick scheduler
 
 
 diff --git a/net/minecraft/server/MinecraftServer.java b/net/minecraft/server/MinecraftServer.java
-index f3eedce18070624ab5a035c038306b1c02feb310..115239fac2dd91954b01daa5da6430374c04d673 100644
+index bedabfb58a7611021078c3dbff6cd6da86900806..b1244bfe37218b985c078f7131a36e0313f91654 100644
 --- a/net/minecraft/server/MinecraftServer.java
 +++ b/net/minecraft/server/MinecraftServer.java
-@@ -1837,6 +1837,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
+@@ -1850,6 +1850,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
              profilerFiller.pop();
              profilerFiller.pop();
              serverLevel.explosionDensityCache.clear(); // Paper - Optimize explosions
