@@ -79,13 +79,13 @@ index cfb914e9f5d4566543210d6f32839ab32552b19b..d9b9e232184191be25681c18ebb1aa19
                      for (int currY = minYIterate; currY <= maxYIterate; ++currY) {
                          final int blockY = currY | (currChunkY << 4);
 diff --git a/net/minecraft/world/level/chunk/LevelChunkSection.java b/net/minecraft/world/level/chunk/LevelChunkSection.java
-index 029d224557613b46f015785a5bbffe49a6f39ec6..a13771119488202fa0ad27121616f82553be968c 100644
+index 512835828f65f496c730122091d9bd117ca5eb78..6699f03354449f01291b1acaf334bfb24729f38a 100644
 --- a/net/minecraft/world/level/chunk/LevelChunkSection.java
 +++ b/net/minecraft/world/level/chunk/LevelChunkSection.java
-@@ -43,6 +43,13 @@ public class LevelChunkSection implements ca.spottedleaf.moonrise.patches.block_
-         return this.tickingBlocks;
+@@ -63,6 +63,13 @@ public class LevelChunkSection implements ca.spottedleaf.moonrise.patches.block_
+         }
      }
-     // Paper end - block counting
+     // Sakura end - track block changes and tick scheduler
 +    // Sakura start - optimise block counting for cannon entities
 +    private short movingPistonBlocks;
 +
@@ -96,7 +96,7 @@ index 029d224557613b46f015785a5bbffe49a6f39ec6..a13771119488202fa0ad27121616f825
  
      private LevelChunkSection(LevelChunkSection section) {
          this.nonEmptyBlockCount = section.nonEmptyBlockCount;
-@@ -113,6 +120,18 @@ public class LevelChunkSection implements ca.spottedleaf.moonrise.patches.block_
+@@ -133,6 +140,18 @@ public class LevelChunkSection implements ca.spottedleaf.moonrise.patches.block_
              }
          }
  
@@ -115,7 +115,7 @@ index 029d224557613b46f015785a5bbffe49a6f39ec6..a13771119488202fa0ad27121616f825
          final boolean oldTicking = oldState.isRandomlyTicking();
          final boolean newTicking = newState.isRandomlyTicking();
          if (oldTicking != newTicking) {
-@@ -188,6 +207,7 @@ public class LevelChunkSection implements ca.spottedleaf.moonrise.patches.block_
+@@ -208,6 +227,7 @@ public class LevelChunkSection implements ca.spottedleaf.moonrise.patches.block_
          this.tickingBlockCount = (short)0;
          this.tickingFluidCount = (short)0;
          this.specialCollidingBlocks = (short)0;
@@ -123,7 +123,7 @@ index 029d224557613b46f015785a5bbffe49a6f39ec6..a13771119488202fa0ad27121616f825
          this.tickingBlocks.clear();
  
          if (this.maybeHas((final BlockState state) -> !state.isAir())) {
-@@ -216,6 +236,12 @@ public class LevelChunkSection implements ca.spottedleaf.moonrise.patches.block_
+@@ -236,6 +256,12 @@ public class LevelChunkSection implements ca.spottedleaf.moonrise.patches.block_
                      continue;
                  }
  
