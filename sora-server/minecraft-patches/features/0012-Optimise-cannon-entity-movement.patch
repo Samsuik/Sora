@@ -5,7 +5,7 @@ Subject: [PATCH] Optimise cannon entity movement
 
 
 diff --git a/net/minecraft/world/entity/Entity.java b/net/minecraft/world/entity/Entity.java
-index 3984f53be614ba3767f24e07219e5658c46b7486..8f9e304d7c65412ecad5dae0ddbb97b561c12be3 100644
+index 6abfcb9008c3b433b548d1cb6051d22c33c37521..47bbd69d4331230802b30c63e70d8ca6efa2a216 100644
 --- a/net/minecraft/world/entity/Entity.java
 +++ b/net/minecraft/world/entity/Entity.java
 @@ -1236,7 +1236,7 @@ public abstract class Entity implements SyncedDataHolder, DebugValueSource, Name
@@ -151,7 +151,7 @@ index 3984f53be614ba3767f24e07219e5658c46b7486..8f9e304d7c65412ecad5dae0ddbb97b5
      protected Vec3 collide(Vec3 movement) {
          final boolean xZero = movement.x == 0.0;
 diff --git a/net/minecraft/world/entity/item/FallingBlockEntity.java b/net/minecraft/world/entity/item/FallingBlockEntity.java
-index af7dd04ecbf9e8b35357da421fb156aee61261b5..0344ba2a6d063a4ee5d6f9a8985ae8ca8c5816ce 100644
+index cdce0160bc4eeacfd5e7751a0d6d4192d4832c53..00d0cabd7d190e6258b595c372440b0fd06311a4 100644
 --- a/net/minecraft/world/entity/item/FallingBlockEntity.java
 +++ b/net/minecraft/world/entity/item/FallingBlockEntity.java
 @@ -124,6 +124,12 @@ public class FallingBlockEntity extends Entity implements me.samsuik.sakura.enti
@@ -165,10 +165,10 @@ index af7dd04ecbf9e8b35357da421fb156aee61261b5..0344ba2a6d063a4ee5d6f9a8985ae8ca
 +    }
 +    // Sakura end - optimise cannon entity movement
  
-     public FallingBlockEntity(EntityType<? extends FallingBlockEntity> entityType, Level level) {
-         super(entityType, level);
+     public FallingBlockEntity(EntityType<? extends FallingBlockEntity> type, Level level) {
+         super(type, level);
 diff --git a/net/minecraft/world/entity/item/PrimedTnt.java b/net/minecraft/world/entity/item/PrimedTnt.java
-index 0552caf9ede2008926786dc24d941fc8d52441d7..760ccfcb3df42da4eeb773ad0e5f798ac3010889 100644
+index 96fbb8dfeda71aead92eb21644630b3362a80b37..bfbb1012518a126eb5027a7a44b144296212bae3 100644
 --- a/net/minecraft/world/entity/item/PrimedTnt.java
 +++ b/net/minecraft/world/entity/item/PrimedTnt.java
 @@ -82,6 +82,12 @@ public class PrimedTnt extends Entity implements TraceableEntity, me.samsuik.sak
@@ -182,5 +182,5 @@ index 0552caf9ede2008926786dc24d941fc8d52441d7..760ccfcb3df42da4eeb773ad0e5f798a
 +    }
 +    // Sakura end - optimise cannon entity movement
  
-     public PrimedTnt(EntityType<? extends PrimedTnt> entityType, Level level) {
-         super(entityType, level);
+     public PrimedTnt(EntityType<? extends PrimedTnt> type, Level level) {
+         super(type, level);
