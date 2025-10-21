@@ -1,0 +1,44 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Samsuik <kfian294ma4@gmail.com>
+Date: Tue, 21 Oct 2025 17:49:29 +0100
+Subject: [PATCH] Sora - fix purpur MinecraftInternalPlugin hiding exceptions
+
+
+diff --git a/src/main/java/com/destroystokyo/paper/ServerSchedulerReportingWrapper.java b/src/main/java/com/destroystokyo/paper/ServerSchedulerReportingWrapper.java
+index f699ce18ca044f813e194ef2786b7ea853ea86e7..f9ebedcdb99336b6bb4a48057ae6f57089cd7b06 100644
+--- a/src/main/java/com/destroystokyo/paper/ServerSchedulerReportingWrapper.java
++++ b/src/main/java/com/destroystokyo/paper/ServerSchedulerReportingWrapper.java
+@@ -16,19 +16,27 @@ public class ServerSchedulerReportingWrapper implements Runnable {
+         this.internalTask = Preconditions.checkNotNull(internalTask, "internalTask");
+     }
+ 
++    // Sora start - fix purpur MinecraftInternalPlugin hiding exceptions
++    private static void callSchedulerExceptionEvent(Throwable throwable, CraftTask internalTask) {
++        org.bukkit.Server bukkitServer = internalTask.getOwner() instanceof org.purpurmc.purpur.util.MinecraftInternalPlugin
++                ? org.bukkit.Bukkit.getServer()
++                : internalTask.getOwner().getServer();
++        bukkitServer.getPluginManager().callEvent(
++                new ServerExceptionEvent(new ServerSchedulerException(throwable, internalTask))
++        );
++    }
++
+     @Override
+     public void run() {
+         try {
+             internalTask.run();
+         } catch (RuntimeException e) {
+-            internalTask.getOwner().getServer().getPluginManager().callEvent(
+-                    new ServerExceptionEvent(new ServerSchedulerException(e, internalTask))
+-            );
++            callSchedulerExceptionEvent(e, this.internalTask);
+             throw e;
+         } catch (Throwable t) {
+-            internalTask.getOwner().getServer().getPluginManager().callEvent(
+-                    new ServerExceptionEvent(new ServerSchedulerException(t, internalTask))
+-            ); //Do not rethrow, since it is not permitted with Runnable#run
++            callSchedulerExceptionEvent(t, this.internalTask);
++            //Do not rethrow, since it is not permitted with Runnable#run
++            // Sora end - fix purpur MinecraftInternalPlugin hiding exceptions
+         }
+     }
+ 
