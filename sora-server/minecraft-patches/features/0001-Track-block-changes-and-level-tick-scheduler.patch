@@ -5,10 +5,10 @@ Subject: [PATCH] Track block changes and level tick scheduler
 
 
 diff --git a/net/minecraft/server/MinecraftServer.java b/net/minecraft/server/MinecraftServer.java
-index e7c3a252d301ca977471d328b30a22b79510de2d..de6b8093587a748628af070159ac488925190e68 100644
+index 4dd622ceb97bc5cc42de97a6d592fd14f4445b2c..c83ee2b0444118af61e9752ebf7b5381be542663 100644
 --- a/net/minecraft/server/MinecraftServer.java
 +++ b/net/minecraft/server/MinecraftServer.java
-@@ -1869,6 +1869,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
+@@ -1864,6 +1864,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
              profilerFiller.pop();
              profilerFiller.pop();
              serverLevel.explosionDensityCache.clear(); // Paper - Optimize explosions
@@ -17,10 +17,10 @@ index e7c3a252d301ca977471d328b30a22b79510de2d..de6b8093587a748628af070159ac4889
          this.isIteratingOverLevels = false; // Paper - Throw exception on world create while being ticked
  
 diff --git a/net/minecraft/world/level/Level.java b/net/minecraft/world/level/Level.java
-index 9cda929154c7653306bad1032f23355cd793ed22..d5ee001c25d2c18a26465541ac0739a8d1e487d7 100644
+index 836332746c85267187f5055656eeaf88e19dc3ec..31decd76f2444e72e3d54a745b3a443829f0f4c2 100644
 --- a/net/minecraft/world/level/Level.java
 +++ b/net/minecraft/world/level/Level.java
-@@ -873,6 +873,10 @@ public abstract class Level implements LevelAccessor, AutoCloseable, ca.spottedl
+@@ -874,6 +874,10 @@ public abstract class Level implements LevelAccessor, AutoCloseable, ca.spottedl
          return chunk != null ? chunk.getNoiseBiome(x, y, z) : this.getUncachedNoiseBiome(x, y, z);
      }
      // Paper end - optimise random ticking
@@ -32,7 +32,7 @@ index 9cda929154c7653306bad1032f23355cd793ed22..d5ee001c25d2c18a26465541ac0739a8
      protected Level(
          WritableLevelData levelData,
 diff --git a/net/minecraft/world/level/chunk/LevelChunk.java b/net/minecraft/world/level/chunk/LevelChunk.java
-index 50a091ab493a7fbc5c457cabd2e26abece5f708a..7d62bc664ec6d26a41571c78ec3229604ac625f5 100644
+index de59760d27280555a334bda4f436164568cffbd6..47c11ffb876019167895b3b4d1a2e455285253b2 100644
 --- a/net/minecraft/world/level/chunk/LevelChunk.java
 +++ b/net/minecraft/world/level/chunk/LevelChunk.java
 @@ -136,6 +136,16 @@ public class LevelChunk extends ChunkAccess implements DebugValueSource, ca.spot
@@ -60,7 +60,7 @@ index 50a091ab493a7fbc5c457cabd2e26abece5f708a..7d62bc664ec6d26a41571c78ec322960
      }
  
      public LevelChunk(ServerLevel level, ProtoChunk chunk, @Nullable LevelChunk.PostLoadProcessor postLoad) {
-@@ -421,6 +432,12 @@ public class LevelChunk extends ChunkAccess implements DebugValueSource, ca.spot
+@@ -423,6 +434,12 @@ public class LevelChunk extends ChunkAccess implements DebugValueSource, ca.spot
                  if (!section.getBlockState(i, i1, i2).is(block)) {
                      return null;
                  } else {

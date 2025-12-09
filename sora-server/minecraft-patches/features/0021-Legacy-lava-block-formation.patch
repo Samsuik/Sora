@@ -5,7 +5,7 @@ Subject: [PATCH] Legacy lava block formation
 
 
 diff --git a/net/minecraft/world/level/block/LiquidBlock.java b/net/minecraft/world/level/block/LiquidBlock.java
-index 60bbea66c5ff6b6730c0ea2f6278543d53a3f5b1..be0303a8ae227d10a310ec91f100c5ed657e8c38 100644
+index 8aee4b3a983154ac92271e8955ddfb3bfb4c7300..ac3ad7a2bb6fada850220e15f4c4e2317cd0a90a 100644
 --- a/net/minecraft/world/level/block/LiquidBlock.java
 +++ b/net/minecraft/world/level/block/LiquidBlock.java
 @@ -204,7 +204,14 @@ public class LiquidBlock extends Block implements BucketPickup {
@@ -25,10 +25,10 @@ index 60bbea66c5ff6b6730c0ea2f6278543d53a3f5b1..be0303a8ae227d10a310ec91f100c5ed
                          return true;
                      }
 diff --git a/net/minecraft/world/level/material/LavaFluid.java b/net/minecraft/world/level/material/LavaFluid.java
-index 8a3bc3346b0bcfdf9d32716a2b421605f4797615..4f06515082a44e6a61be9e036cd866536b886ed2 100644
+index 55c56cee997b913a2b645becaf9a12e53c500f56..564c9fbe9e0f37733f6a9fe26d4ee60a20104093 100644
 --- a/net/minecraft/world/level/material/LavaFluid.java
 +++ b/net/minecraft/world/level/material/LavaFluid.java
-@@ -185,9 +185,16 @@ public abstract class LavaFluid extends FlowingFluid {
+@@ -187,9 +187,16 @@ public abstract class LavaFluid extends FlowingFluid {
  
      @Override
      public boolean canBeReplacedWith(FluidState fluidState, BlockGetter level, BlockPos pos, Fluid fluid, Direction direction) {

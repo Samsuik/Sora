@@ -13,11 +13,11 @@ import org.jspecify.annotations.NullMarked;
 @NullMarked
 public final class FallingBlockBehaviour {
     public static boolean isAbleToStackOnBlock(final FallingBlockEntity fallingBlock, final MinecraftMechanicsTarget mechanicsTarget) {
-        if (!mechanicsTarget.between(me.samsuik.sakura.mechanics.MechanicVersion.v1_9, me.samsuik.sakura.mechanics.MechanicVersion.v1_14)) {
+        if (!mechanicsTarget.between(MechanicVersion.v1_9, MechanicVersion.v1_14)) {
             return true;
         }
         // This is patched by default on Paper.
-        if (mechanicsTarget.isServerType(me.samsuik.sakura.mechanics.ServerType.PAPER)) {
+        if (mechanicsTarget.isServerType(ServerType.PAPER)) {
             return true;
         }
         // todo: Entity#getOnPos might be a good alternative to this

@@ -5,10 +5,10 @@ Subject: [PATCH] Configurable left shooting and adjusting limits
 
 
 diff --git a/net/minecraft/world/entity/Entity.java b/net/minecraft/world/entity/Entity.java
-index 26e2c3770e19c76cab8a6178d1d322b70dd9a78d..cf1aa715e0884fd5851433c67d3d7ac7bfc09498 100644
+index 0bae4e8808f3e3d34d08b0828df7a85aa3d6b851..c16315b42ece510691205537be778c6732114288 100644
 --- a/net/minecraft/world/entity/Entity.java
 +++ b/net/minecraft/world/entity/Entity.java
-@@ -618,6 +618,47 @@ public abstract class Entity implements SyncedDataHolder, DebugValueSource, Name
+@@ -617,6 +617,47 @@ public abstract class Entity implements SyncedDataHolder, DebugValueSource, Name
          return Math.max(x, z) >= this.travelDistanceLimit;
      }
      // Sakura end - entity travel distance limits
@@ -56,7 +56,7 @@ index 26e2c3770e19c76cab8a6178d1d322b70dd9a78d..cf1aa715e0884fd5851433c67d3d7ac7
  
      // Purpur start - Add canSaveToDisk to Entity
      public boolean canSaveToDisk() {
-@@ -1688,6 +1729,7 @@ public abstract class Entity implements SyncedDataHolder, DebugValueSource, Name
+@@ -1687,6 +1728,7 @@ public abstract class Entity implements SyncedDataHolder, DebugValueSource, Name
          }
  
          if (xSmaller && z != 0.0) {
@@ -64,7 +64,7 @@ index 26e2c3770e19c76cab8a6178d1d322b70dd9a78d..cf1aa715e0884fd5851433c67d3d7ac7
              z = this.scanZ(currBoundingBox, z, voxelList, bbList);
              if (z != 0.0) {
                  currBoundingBox = ca.spottedleaf.moonrise.patches.collisions.CollisionUtil.offsetZ(currBoundingBox, z);
-@@ -1695,6 +1737,11 @@ public abstract class Entity implements SyncedDataHolder, DebugValueSource, Name
+@@ -1694,6 +1736,11 @@ public abstract class Entity implements SyncedDataHolder, DebugValueSource, Name
          }
  
          if (x != 0.0) {
@@ -77,7 +77,7 @@ index 26e2c3770e19c76cab8a6178d1d322b70dd9a78d..cf1aa715e0884fd5851433c67d3d7ac7
              if (x != 0.0) {
                  currBoundingBox = ca.spottedleaf.moonrise.patches.collisions.CollisionUtil.offsetX(currBoundingBox, x);
 diff --git a/net/minecraft/world/entity/item/FallingBlockEntity.java b/net/minecraft/world/entity/item/FallingBlockEntity.java
-index 02dc6c5965354047fc05ad3d3293c7f6277f50cd..1dc2976daac6e0621a3cf573d7e1e673ba5934a3 100644
+index bd19fe30448147ffa287dcea7a1571082bc2bb76..ac2c8d000e94fdf6b9cba6a22cbb84b093b3beb8 100644
 --- a/net/minecraft/world/entity/item/FallingBlockEntity.java
 +++ b/net/minecraft/world/entity/item/FallingBlockEntity.java
 @@ -269,6 +269,7 @@ public class FallingBlockEntity extends Entity implements me.samsuik.sakura.enti

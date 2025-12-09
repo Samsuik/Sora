@@ -153,10 +153,10 @@ index 638432a2e6506d3db6a25c068a33eeafb13cf0d6..c386288e808e97c938f1909d81ebfa00
  
          if (this.entity instanceof LivingEntity) {
 diff --git a/net/minecraft/world/entity/Entity.java b/net/minecraft/world/entity/Entity.java
-index a343c441aefc6d8532a745118818cf14a60fd072..0477760a03a94d5039ac7288b7e99d1f3dcd6d28 100644
+index 4b5bac523063fdd227a6cbc03ec511a3aed7b43c..2c5128ceed77e8d49855cc005597d3b9c804fb72 100644
 --- a/net/minecraft/world/entity/Entity.java
 +++ b/net/minecraft/world/entity/Entity.java
-@@ -3767,7 +3767,7 @@ public abstract class Entity implements SyncedDataHolder, DebugValueSource, Name
+@@ -3759,7 +3759,7 @@ public abstract class Entity implements SyncedDataHolder, DebugValueSource, Name
              this.entityData.markDirty(DATA_AIR_SUPPLY_ID);
              return;
          }
@@ -166,7 +166,7 @@ index a343c441aefc6d8532a745118818cf14a60fd072..0477760a03a94d5039ac7288b7e99d1f
      }
  
 diff --git a/net/minecraft/world/entity/item/FallingBlockEntity.java b/net/minecraft/world/entity/item/FallingBlockEntity.java
-index d1f806f950707091d02788117c1f8cffe5b2de04..a4fd6b0a6762ce4d9e488f305dd2abe1e43edbd8 100644
+index 468e08c6ada0554b3af694acad4130ed7ec7b46f..0826565ff322bd1b0cf69c7bac4c9206cf4b9d96 100644
 --- a/net/minecraft/world/entity/item/FallingBlockEntity.java
 +++ b/net/minecraft/world/entity/item/FallingBlockEntity.java
 @@ -144,7 +144,7 @@ public class FallingBlockEntity extends Entity {
@@ -196,10 +196,10 @@ index c68473499b8b08f35041d4b9e3148d5b255f7749..e15b9e31982bdda51668288036f8d783
  
      public int getFuse() {
 diff --git a/net/minecraft/world/entity/player/Player.java b/net/minecraft/world/entity/player/Player.java
-index 6bc9857349ad8f50498c36959377ac6767e092fb..0481bf18bbb1a8b9d2d58bb57332bcc8e9edb2c0 100644
+index 1906e123c85e9e8a2a341308cd9641196c98327d..656c043e50ad0adc4bd05e282c1677493a49ff5a 100644
 --- a/net/minecraft/world/entity/player/Player.java
 +++ b/net/minecraft/world/entity/player/Player.java
-@@ -620,7 +620,7 @@ public abstract class Player extends Avatar implements ContainerUser {
+@@ -621,7 +621,7 @@ public abstract class Player extends Avatar implements ContainerUser {
  
      public void increaseScore(int score) {
          int score1 = this.getScore();

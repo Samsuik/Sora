@@ -109,7 +109,7 @@ index 07f44bb61487671dd7df4524e7c65e101a1fc5b5..cf2b2794a2979d206ae9348498e4d8fa
                  if (flag && !player.getBukkitEntity().canSee(this.entity.getBukkitEntity())) { // Paper - only consider hits
                      flag = false;
 diff --git a/net/minecraft/server/level/ServerLevel.java b/net/minecraft/server/level/ServerLevel.java
-index 8e83084aa606966b00f9abc544e0024b030ae5cd..de66958da67710b59b515d6c592a2e052cea32c0 100644
+index ff762c2bbabfac4a69455fb632f543383d924f54..948c0782112352b1ca85f28491b40ac521755a85 100644
 --- a/net/minecraft/server/level/ServerLevel.java
 +++ b/net/minecraft/server/level/ServerLevel.java
 @@ -594,6 +594,22 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
@@ -166,10 +166,10 @@ index 8e83084aa606966b00f9abc544e0024b030ae5cd..de66958da67710b59b515d6c592a2e05
          }
  
 diff --git a/net/minecraft/server/level/ServerPlayer.java b/net/minecraft/server/level/ServerPlayer.java
-index 35688f83064613f211a4d94615463811317d3392..7f725ded565faf69c3690b3be4768344dfc33c3f 100644
+index 56826d001dc084567f2f522006a0a57ba01312da..579738034688ff32f7f1ec101c6dc5d1808d8325 100644
 --- a/net/minecraft/server/level/ServerPlayer.java
 +++ b/net/minecraft/server/level/ServerPlayer.java
-@@ -476,6 +476,7 @@ public class ServerPlayer extends Player implements ca.spottedleaf.moonrise.patc
+@@ -477,6 +477,7 @@ public class ServerPlayer extends Player implements ca.spottedleaf.moonrise.patc
          return this.viewDistanceHolder;
      }
      // Paper end - rewrite chunk system
@@ -256,10 +256,10 @@ index e98400719a4ab43dc0ce90cdca19ba86e4849720..f4aab99fe898ce75da8e3db700907acc
          if (packet.isTerminal()) {
              this.close();
 diff --git a/net/minecraft/server/network/ServerGamePacketListenerImpl.java b/net/minecraft/server/network/ServerGamePacketListenerImpl.java
-index b39d3713b0ece3ae08f1c1c359d114011117192f..34828eb8ab869ec33ccefc24a9178ff89945f874 100644
+index cb8d0109932116776dd3be33986d1e1ef775d121..79c74b93d41260eb51cf7a29ed61b4f9a74c9ac0 100644
 --- a/net/minecraft/server/network/ServerGamePacketListenerImpl.java
 +++ b/net/minecraft/server/network/ServerGamePacketListenerImpl.java
-@@ -3305,6 +3305,7 @@ public class ServerGamePacketListenerImpl
+@@ -3306,6 +3306,7 @@ public class ServerGamePacketListenerImpl
  
                          event.setCancelled(cancelled);
                          net.minecraft.world.inventory.AbstractContainerMenu oldContainer = this.player.containerMenu; // SPIGOT-1224
@@ -268,10 +268,10 @@ index b39d3713b0ece3ae08f1c1c359d114011117192f..34828eb8ab869ec33ccefc24a9178ff8
                          if (this.player.containerMenu != oldContainer) {
                              this.player.containerMenu.resumeRemoteUpdates();
 diff --git a/net/minecraft/world/entity/Entity.java b/net/minecraft/world/entity/Entity.java
-index 293defbf22e10273aceaa247438f3e841b29dbbe..e491effe0768bf668be9ca02a746feebc5fdd0b2 100644
+index b7a660ac2f5484ff460375b06ef5f7c6314f723b..c5014bccd94bd966c9d8cac43884a20eb331ad41 100644
 --- a/net/minecraft/world/entity/Entity.java
 +++ b/net/minecraft/world/entity/Entity.java
-@@ -538,6 +538,10 @@ public abstract class Entity implements SyncedDataHolder, DebugValueSource, Name
+@@ -537,6 +537,10 @@ public abstract class Entity implements SyncedDataHolder, DebugValueSource, Name
      }
      // Paper end - optimise entity tracker
      public boolean pushedByFluid = true; // Sakura - entity pushed by fluid api
@@ -283,7 +283,7 @@ index 293defbf22e10273aceaa247438f3e841b29dbbe..e491effe0768bf668be9ca02a746feeb
      // Purpur start - Add canSaveToDisk to Entity
      public boolean canSaveToDisk() {
 diff --git a/net/minecraft/world/entity/item/FallingBlockEntity.java b/net/minecraft/world/entity/item/FallingBlockEntity.java
-index 7b67387d3bb66b1c8ab77e1805c9530a8f1ffa3c..8150b567c05d2c8e87f4b65d616d5c0c01bc2e19 100644
+index 8003dc1c4ecc9b69d92cf0441fe41e3ef8df49c2..85bebec21261e71b82a0b9c02e1c5edd8bd4cde6 100644
 --- a/net/minecraft/world/entity/item/FallingBlockEntity.java
 +++ b/net/minecraft/world/entity/item/FallingBlockEntity.java
 @@ -79,6 +79,7 @@ public class FallingBlockEntity extends Entity {

@@ -33,31 +33,31 @@ index ff747a1ecdf3c888bca0d69de4f85dcd810b6139..d90f6aa4557b5863eba6a206226f763c
          }
  
 diff --git a/net/minecraft/server/level/ServerLevel.java b/net/minecraft/server/level/ServerLevel.java
-index 581defb0360d7070b2c5b1c41fd5b8d26ebffe1c..dde135167c12248d991e9e1b6411455cf31ea031 100644
+index af5bc25103c0ec86cb0d5b2b19ee1ffdef8effbb..d0833deaa0da21236c030d76589acb68717af32f 100644
 --- a/net/minecraft/server/level/ServerLevel.java
 +++ b/net/minecraft/server/level/ServerLevel.java
-@@ -739,6 +739,7 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
-         this.levelTickScheduler.repeatingTask(this.explosionPositions::clear, 0); // Sakura - client visibility settings
+@@ -740,6 +740,7 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
          this.levelTickScheduler.repeatingTask(this.mergeHandler::expire, 200); // Sakura - merge cannon entities
          this.levelTickScheduler.repeatingTask(this.densityCache::expire, 0); // Sakura - explosion density cache
+         this.levelTickScheduler.repeatingTask(this.dispenseRelocationHandler::clear, 0); // Sakura - configure server mechanics
 +        this.levelTickScheduler.repeatingTask(this.redstoneWireCache::expire, 300); // Sakura - cache vanilla and eigencraft wires
      }
  
      // Paper start
 diff --git a/net/minecraft/world/level/Level.java b/net/minecraft/world/level/Level.java
-index 76b10bd3dc7b00d889c84df193cca40db010fcc6..153876fa6093555c632b8688b5e9ec897a2dd924 100644
+index f160f1290208406d20babd42e0189ab9b60458ba..3ab9142c556f00a8f65e37084ea49e9d93ef8253 100644
 --- a/net/minecraft/world/level/Level.java
 +++ b/net/minecraft/world/level/Level.java
-@@ -880,6 +880,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable, ca.spottedl
-     public final me.samsuik.sakura.entity.merge.EntityMergeHandler mergeHandler = new me.samsuik.sakura.entity.merge.EntityMergeHandler(); // Sakura - merge cannon entities
+@@ -882,6 +882,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable, ca.spottedl
      public final me.samsuik.sakura.explosion.density.BlockDensityCache densityCache = new me.samsuik.sakura.explosion.density.BlockDensityCache(this); // Sakura - optimise explosion density cache
      public final me.samsuik.sakura.explosion.durable.DurableBlockManager durabilityManager = new me.samsuik.sakura.explosion.durable.DurableBlockManager(); // Sakura - explosion durable blocks
+     public final me.samsuik.sakura.entity.dispensing.DispenseRelocationHandler dispenseRelocationHandler = new me.samsuik.sakura.entity.dispensing.DispenseRelocationHandler(this); // Sakura - configure server mechanics
 +    public final me.samsuik.sakura.redstone.cache.RedstoneWireCache redstoneWireCache = new me.samsuik.sakura.redstone.cache.RedstoneWireCache(this); // Sakura - cache vanilla and eigencraft wires
  
      protected Level(
          WritableLevelData levelData,
 diff --git a/net/minecraft/world/level/block/RedStoneWireBlock.java b/net/minecraft/world/level/block/RedStoneWireBlock.java
-index 9720c55536d09377d1fbcbf1af4acb3caa9952f2..e69c17a02c88b5206b211ef6421f291657768a25 100644
+index 96e3e0e92c7179bdf1e576cd90f4e4370fb26de7..58e5df3bef82cbae868fa680277aeb12b3f45975 100644
 --- a/net/minecraft/world/level/block/RedStoneWireBlock.java
 +++ b/net/minecraft/world/level/block/RedStoneWireBlock.java
 @@ -306,6 +306,12 @@ public class RedStoneWireBlock extends Block {
@@ -108,7 +108,7 @@ index 9720c55536d09377d1fbcbf1af4acb3caa9952f2..e69c17a02c88b5206b211ef6421f2916
                      : powerValue;
              }
 diff --git a/net/minecraft/world/level/block/state/BlockBehaviour.java b/net/minecraft/world/level/block/state/BlockBehaviour.java
-index 3a3b8f8983e3d6308ea45e9ca879f6441759f793..60a6f24a714ecb04b30448e2fbe5eefbc95b4b3a 100644
+index 122b7adba48ced2987482615ec4f62ccf1f0983a..e79853940966f4c6c63ae96d6a231f6c485f56ed 100644
 --- a/net/minecraft/world/level/block/state/BlockBehaviour.java
 +++ b/net/minecraft/world/level/block/state/BlockBehaviour.java
 @@ -524,6 +524,13 @@ public abstract class BlockBehaviour implements FeatureElement {
@@ -160,10 +160,10 @@ index 5d17213a692016d2f005c7820bf2cf1f42ce411f..6e0a41bd6c171b37476cedb57d6dcbdb
              this.addedThisLayer.clear();
              this.count = 0;
 diff --git a/net/minecraft/world/level/redstone/DefaultRedstoneWireEvaluator.java b/net/minecraft/world/level/redstone/DefaultRedstoneWireEvaluator.java
-index abcc144a086a45bf4cfa4d1a33e2ae10952e0da2..5cd635ca6c215dde0fd979dd7dbaa9edea957a20 100644
+index 4edf6e96cd47ab75aedd4baefcf49cd3fae00d7a..25041865bc4dbb17ed9655834af567dfc4ca94ee 100644
 --- a/net/minecraft/world/level/redstone/DefaultRedstoneWireEvaluator.java
 +++ b/net/minecraft/world/level/redstone/DefaultRedstoneWireEvaluator.java
-@@ -27,7 +27,14 @@ public class DefaultRedstoneWireEvaluator extends RedstoneWireEvaluator {
+@@ -28,7 +28,14 @@ public class DefaultRedstoneWireEvaluator extends RedstoneWireEvaluator {
          }
          if (oldPower != i) {
              // CraftBukkit end
@@ -175,10 +175,10 @@ index abcc144a086a45bf4cfa4d1a33e2ae10952e0da2..5cd635ca6c215dde0fd979dd7dbaa9ed
              if (level.getBlockState(pos) == state) {
 +                wireCache.trackWirePower(pos, i, oldPower);
 +                // Sakura end - cache vanilla and eigencraft wires
-                 level.setBlock(pos, state.setValue(RedStoneWireBlock.POWER, i), 2);
+                 level.setBlock(pos, state.setValue(RedStoneWireBlock.POWER, i), Block.UPDATE_CLIENTS);
              }
  
-@@ -39,6 +46,7 @@ public class DefaultRedstoneWireEvaluator extends RedstoneWireEvaluator {
+@@ -40,6 +47,7 @@ public class DefaultRedstoneWireEvaluator extends RedstoneWireEvaluator {
              }
  
              for (BlockPos blockPos : set) {
@@ -187,7 +187,7 @@ index abcc144a086a45bf4cfa4d1a33e2ae10952e0da2..5cd635ca6c215dde0fd979dd7dbaa9ed
              }
          }
 diff --git a/net/minecraft/world/level/redstone/NeighborUpdater.java b/net/minecraft/world/level/redstone/NeighborUpdater.java
-index 3f4b17a222fdbf97ca8979a43f1f231d9e9d8ddb..42705f342c3594d4a327eb2aa169ee59cd87f13d 100644
+index f45cf0136e77ed5a903d033a7b0611e5edc23db9..e4057d364894bcab766a0ef444a9d54ed20e8822 100644
 --- a/net/minecraft/world/level/redstone/NeighborUpdater.java
 +++ b/net/minecraft/world/level/redstone/NeighborUpdater.java
 @@ -17,6 +17,12 @@ import net.minecraft.world.level.block.state.BlockState;

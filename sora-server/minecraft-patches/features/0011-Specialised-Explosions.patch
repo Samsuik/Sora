@@ -5,7 +5,7 @@ Subject: [PATCH] Specialised Explosions
 
 
 diff --git a/net/minecraft/server/level/ServerLevel.java b/net/minecraft/server/level/ServerLevel.java
-index cbd98144d8b8e44eb7c1baef33d33b36874315f9..e935767510e45c1ec1a264361257563be337b6f7 100644
+index 49db1b3a488fd635f4fd3c0521ea7d7f4596fc5b..5114ded7324f428b8e5c3f05b605aecf9c95be17 100644
 --- a/net/minecraft/server/level/ServerLevel.java
 +++ b/net/minecraft/server/level/ServerLevel.java
 @@ -2050,7 +2050,14 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
@@ -64,7 +64,7 @@ index cbd98144d8b8e44eb7c1baef33d33b36874315f9..e935767510e45c1ec1a264361257563b
  
      private Explosion.BlockInteraction getDestroyType(GameRules.Key<GameRules.BooleanValue> decayGameRule) {
 diff --git a/net/minecraft/world/entity/item/PrimedTnt.java b/net/minecraft/world/entity/item/PrimedTnt.java
-index 01d7b334b1bdd26eb1b858f541618d058a0bb90e..0552caf9ede2008926786dc24d941fc8d52441d7 100644
+index 23740533379eaa972f615a623a456fe4478aa9c5..96fbb8dfeda71aead92eb21644630b3362a80b37 100644
 --- a/net/minecraft/world/entity/item/PrimedTnt.java
 +++ b/net/minecraft/world/entity/item/PrimedTnt.java
 @@ -79,20 +79,7 @@ public class PrimedTnt extends Entity implements TraceableEntity, me.samsuik.sak

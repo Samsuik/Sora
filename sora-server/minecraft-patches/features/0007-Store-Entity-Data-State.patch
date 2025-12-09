@@ -5,10 +5,10 @@ Subject: [PATCH] Store Entity Data/State
 
 
 diff --git a/net/minecraft/world/entity/Entity.java b/net/minecraft/world/entity/Entity.java
-index dada54ab9db4ac0b933825dd85c1386a535ea4a4..7344ad488fc7dfca0dcddbb2630ea7d5150eebd9 100644
+index 2c5128ceed77e8d49855cc005597d3b9c804fb72..1594b96667c3a376b4071dad7bb792e911ede765 100644
 --- a/net/minecraft/world/entity/Entity.java
 +++ b/net/minecraft/world/entity/Entity.java
-@@ -555,6 +555,21 @@ public abstract class Entity implements SyncedDataHolder, DebugValueSource, Name
+@@ -554,6 +554,21 @@ public abstract class Entity implements SyncedDataHolder, DebugValueSource, Name
          return flags;
      }
      // Sakura end - load chunks on movement
@@ -31,10 +31,10 @@ index dada54ab9db4ac0b933825dd85c1386a535ea4a4..7344ad488fc7dfca0dcddbb2630ea7d5
      // Purpur start - Add canSaveToDisk to Entity
      public boolean canSaveToDisk() {
 diff --git a/net/minecraft/world/level/Level.java b/net/minecraft/world/level/Level.java
-index f9635d6f82e9d279e25d793e9581b5678adcec2a..f154639770f3371d6e192246c2cdf8826790af9f 100644
+index 31decd76f2444e72e3d54a745b3a443829f0f4c2..583d23d99c1f5b355b2ee14896129094bec1524a 100644
 --- a/net/minecraft/world/level/Level.java
 +++ b/net/minecraft/world/level/Level.java
-@@ -1494,6 +1494,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable, ca.spottedl
+@@ -1495,6 +1495,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable, ca.spottedl
  
      public <T extends Entity> void guardEntityTick(Consumer<T> action, T entity) {
          try {
