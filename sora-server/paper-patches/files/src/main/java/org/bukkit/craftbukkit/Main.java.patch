@@ -1,8 +1,8 @@
 --- a/src/main/java/org/bukkit/craftbukkit/Main.java
 +++ b/src/main/java/org/bukkit/craftbukkit/Main.java
-@@ -172,6 +_,14 @@
-                     .describedAs("Yml file");
-                 // Purpur end - Purpur config files
+@@ -133,6 +_,14 @@
+                         .defaultsTo(new File[] {})
+                         .describedAs("Jar file");
  
 +                // Sakura start - sakura configuration files
 +                acceptsAll(asList("sakura-dir", "sakura-settings-directory"), "Directory for Sakura settings")
@@ -12,6 +12,6 @@
 +                    .describedAs("Config directory");
 +                // Sakura end - sakura configuration files
 +
-                 this.accepts("server-name", "Name of the server")
+                 this.acceptsAll(asList("add-plugin-dir", "add-extra-plugin-dir"), "Specify paths to extra plugin directories to be loaded in addition to the plugins folder. This argument can be specified multiple times, once for each extra plugin dir path.")
                          .withRequiredArg()
-                         .ofType(String.class)
+                         .ofType(File.class)

@@ -11,8 +11,8 @@ import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import me.samsuik.sakura.entity.merge.MergeLevel;
 import me.samsuik.sakura.explosion.durable.DurableMaterial;
 import me.samsuik.sakura.mechanics.MinecraftMechanicsTarget;
-import net.minecraft.Util;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.Util;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -30,8 +31,8 @@ public final class WorldConfiguration extends ConfigurationPart {
     private static final Logger LOGGER = LogUtils.getClassLogger();
     static final int CURRENT_VERSION = 12; // (when you change the version, change the comment, so it conflicts on rebases): rename filter bad nbt from spawn eggs
 
-    private transient final ResourceLocation worldKey;
-    WorldConfiguration(ResourceLocation worldKey) {
+    private transient final Identifier worldKey;
+    WorldConfiguration(Identifier worldKey) {
         this.worldKey = worldKey;
     }
 
@@ -59,6 +60,8 @@ public final class WorldConfiguration extends ConfigurationPart {
             public IntOr.Disabled leftShootingThreshold = IntOr.Disabled.DISABLED;
             @Comment("The maximum amount of blocks that a cannon can adjust")
             public IntOr.Disabled maxAdjustDistance = IntOr.Disabled.DISABLED;
+            @Comment("The maximum amount of falling blocks that can fall instantly")
+            public IntOr.Disabled instantBlockFallLimit = IntOr.Disabled.DISABLED;
         }
 
         public Tnt tnt = new Tnt();
@@ -149,6 +152,7 @@ public final class WorldConfiguration extends ConfigurationPart {
             public boolean legacyCombatMechanics = false;
             public boolean allowSweepAttacks = true;
             public boolean shieldDamageReduction = false;
+            public boolean oldPotionEffects = false;
             public boolean oldEnchantedGoldenApple = false;
             public boolean oldSoundsAndParticleEffects = false;
             public boolean fastHealthRegen = true;
@@ -159,6 +163,7 @@ public final class WorldConfiguration extends ConfigurationPart {
             )
             public DoubleOr.Disabled maxDamage = DoubleOr.Disabled.DISABLED;
             public IntOr.Default maxArmourDamage = IntOr.Default.USE_DEFAULT;
+            public Map<Item, Double> itemAttackDamageOverride = new HashMap<>();
         }
 
         public Knockback knockback = new Knockback();

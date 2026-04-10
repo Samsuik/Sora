@@ -11,6 +11,8 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -20,6 +22,7 @@ import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
+import net.minecraft.world.level.Level;
 import org.apache.commons.lang3.mutable.MutableFloat;
 import org.jspecify.annotations.NullMarked;
 
@@ -33,7 +36,35 @@ public final class CombatUtil {
                 && entity.level().sakuraConfig().players.combat.shieldDamageReduction;
     }
 
-    public static double getLegacyAttackDifference(final ItemStack itemstack) {
+    public static double getEffectAttackDamage(final MobEffectInstance effect) {
+        final MobEffect type = effect.getEffect().value();
+        final MobEffect.AttributeTemplate template = type.attributeModifiers.get(Attributes.ATTACK_DAMAGE);
+
+        return template != null && template.operation() == AttributeModifier.Operation.ADD_VALUE
+            ? template.create(effect.getAmplifier()).amount()
+            : 0.0;
+    }
+
+    public static double getModifiedItemAttackDamage(final Level level, final ItemStack stack) {
+        final double baseAttack = getItemAttackDamage(stack);
+        double modifiedDamage = 0.0;
+
+        if (baseAttack != 0.0 && level.sakuraConfig().players.combat.legacyCombatMechanics) {
+            final OptionalDouble legacyAttack = LegacyDamageMapping.itemAttackDamage(stack.getItem());
+            if (legacyAttack.isPresent()) {
+                modifiedDamage = legacyAttack.getAsDouble() - baseAttack;
+            }
+        }
+
+        final Double attackOverride = level.sakuraConfig().players.combat.itemAttackDamageOverride.get(stack.getItem());
+        if (attackOverride != null) {
+            modifiedDamage = attackOverride - baseAttack - 1;
+        }
+
+        return modifiedDamage;
+    }
+
+    public static double getItemAttackDamage(final ItemStack itemstack) {
         final ItemAttributeModifiers defaultModifiers = itemstack.getItem().components().get(DataComponents.ATTRIBUTE_MODIFIERS);
         if (defaultModifiers != null && !defaultModifiers.modifiers().isEmpty()) { // exists
             double baseAttack = 0.0;
@@ -44,11 +75,7 @@ public final class CombatUtil {
                     return 0;
                 baseAttack += entry.modifier().amount();
             }
-
-            final OptionalDouble legacyAttack = LegacyDamageMapping.itemAttackDamage(itemstack.getItem());
-            if (baseAttack != 0.0 && legacyAttack.isPresent()) {
-                return legacyAttack.getAsDouble() - baseAttack;
-            }
+            return baseAttack;
         }
 
         return 0.0;

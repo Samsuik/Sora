@@ -1,6 +1,6 @@
 --- a/net/minecraft/server/MinecraftServer.java
 +++ b/net/minecraft/server/MinecraftServer.java
-@@ -300,6 +_,7 @@
+@@ -304,6 +_,7 @@
      public volatile boolean abnormalExit; // Paper - Improved watchdog support
      public volatile Thread shutdownThread; // Paper - Improved watchdog support
      public final io.papermc.paper.configuration.PaperConfigurations paperConfigurations; // Paper - add paper configuration files
@@ -8,7 +8,7 @@
      public boolean isIteratingOverLevels = false; // Paper - Throw exception on world create while being ticked
      private final Set<String> pluginsBlockingSleep = new java.util.HashSet<>(); // Paper - API to allow/disallow tick sleeping
      public static final long SERVER_INIT = System.nanoTime(); // Paper - Lag compensation
-@@ -397,6 +_,17 @@
+@@ -401,6 +_,17 @@
          thread.start();
          return minecraftServer;
      }
@@ -19,14 +19,14 @@
 +        return this.tickInformationCollector.latestTickInformation();
 +    }
 +
-+    public final ImmutableList<me.samsuik.sakura.tps.ServerTickInformation> tickHistory(final long from, final long to) {
++    public final it.unimi.dsi.fastutil.objects.ObjectImmutableList<me.samsuik.sakura.tps.ServerTickInformation> tickHistory(final long from, final long to) {
 +        return this.tickInformationCollector.collect(from, to);
 +    }
 +    // Sakura end - track tick information
  
      // Paper start - rewrite chunk system
      private volatile Throwable chunkSystemCrash;
-@@ -563,6 +_,10 @@
+@@ -568,6 +_,10 @@
          Runtime.getRuntime().addShutdownHook(new org.bukkit.craftbukkit.util.ServerShutdownThread(this));
          // CraftBukkit end
          this.paperConfigurations = services.paper().configurations(); // Paper - add paper configuration files
@@ -36,8 +36,8 @@
 +        // Sakura end - sakura configuration files
      }
  
-     private void readScoreboard(DimensionDataStorage dataStorage) {
-@@ -1347,6 +_,11 @@
+     protected abstract boolean initServer() throws IOException;
+@@ -1357,6 +_,11 @@
  
                  this.currentTickStart = tickStart;
                  ++MinecraftServer.currentTick;
@@ -49,10 +49,10 @@
                  // Paper end - improve tick loop
  
                  boolean flag = l == 0L;
-@@ -1373,6 +_,7 @@
-                     this.tickFrame.end();
-                     this.recordEndOfTick(); // Paper - improve tick loop
-                     profilerFiller.popPush("nextTickWait");
+@@ -1371,6 +_,7 @@
+                     this.processPacketsAndTick(flag);
+                     ProfilerFiller profilerFiller = Profiler.get();
+                     profilerFiller.push("nextTickWait");
 +                    this.tickInformationCollector.tickDuration((System.nanoTime() - tickStart) / 1_000_000L); // Sakura - track tick information
                      this.mayHaveDelayedTasks = true;
                      this.delayedTasksMaxNextTickTimeNanos = Math.max(Util.getNanos() + l, this.nextTickTimeNanos);

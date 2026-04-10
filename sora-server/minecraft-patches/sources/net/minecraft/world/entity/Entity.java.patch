@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/entity/Entity.java
 +++ b/net/minecraft/world/entity/Entity.java
-@@ -536,6 +_,7 @@
+@@ -537,6 +_,7 @@
          }
      }
      // Paper end - optimise entity tracker
@@ -8,7 +8,7 @@
  
      // Purpur start - Add canSaveToDisk to Entity
      public boolean canSaveToDisk() {
-@@ -4332,7 +_,7 @@
+@@ -4353,7 +_,7 @@
      }
  
      public boolean isPushedByFluid() {

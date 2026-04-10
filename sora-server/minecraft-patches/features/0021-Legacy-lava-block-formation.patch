@@ -5,7 +5,7 @@ Subject: [PATCH] Legacy lava block formation
 
 
 diff --git a/net/minecraft/world/level/block/LiquidBlock.java b/net/minecraft/world/level/block/LiquidBlock.java
-index 8aee4b3a983154ac92271e8955ddfb3bfb4c7300..ac3ad7a2bb6fada850220e15f4c4e2317cd0a90a 100644
+index c22c4cacadfe3c3a1291ba4a83f966e7b5e9d9af..155d9ad1e5fecb46033e0ad5e3ed2c49825e3cd8 100644
 --- a/net/minecraft/world/level/block/LiquidBlock.java
 +++ b/net/minecraft/world/level/block/LiquidBlock.java
 @@ -204,7 +204,14 @@ public class LiquidBlock extends Block implements BucketPickup {
@@ -25,10 +25,10 @@ index 8aee4b3a983154ac92271e8955ddfb3bfb4c7300..ac3ad7a2bb6fada850220e15f4c4e231
                          return true;
                      }
 diff --git a/net/minecraft/world/level/material/LavaFluid.java b/net/minecraft/world/level/material/LavaFluid.java
-index 55c56cee997b913a2b645becaf9a12e53c500f56..564c9fbe9e0f37733f6a9fe26d4ee60a20104093 100644
+index be63a51052a8331c6dbf6ccd4028a7873d8a2e76..6c1cdd32a99856610e85dd66d5b647667a15312c 100644
 --- a/net/minecraft/world/level/material/LavaFluid.java
 +++ b/net/minecraft/world/level/material/LavaFluid.java
-@@ -187,9 +187,16 @@ public abstract class LavaFluid extends FlowingFluid {
+@@ -185,9 +185,16 @@ public abstract class LavaFluid extends FlowingFluid {
  
      @Override
      public boolean canBeReplacedWith(FluidState fluidState, BlockGetter level, BlockPos pos, Fluid fluid, Direction direction) {
@@ -49,10 +49,10 @@ index 55c56cee997b913a2b645becaf9a12e53c500f56..564c9fbe9e0f37733f6a9fe26d4ee60a
          // Sakura end - configure server mechanics
          return fluidState.getHeight(level, pos) >= 0.44444445F && fluid.is(FluidTags.WATER);
 diff --git a/net/minecraft/world/level/material/WaterFluid.java b/net/minecraft/world/level/material/WaterFluid.java
-index 72d98cc02f0c986081a048e2955017ae8c567518..55bd8a07eb25a40099b0d77a2f2ebe58dc564a8e 100644
+index 3dc4d3606b8f1fece6305269818a0931729a02c4..69f02ce49a3a2cd3c9115246fd0eff7b8daafadb 100644
 --- a/net/minecraft/world/level/material/WaterFluid.java
 +++ b/net/minecraft/world/level/material/WaterFluid.java
-@@ -131,10 +131,18 @@ public abstract class WaterFluid extends FlowingFluid {
+@@ -130,10 +130,18 @@ public abstract class WaterFluid extends FlowingFluid {
  
      @Override
      public boolean canBeReplacedWith(FluidState fluidState, BlockGetter level, BlockPos pos, Fluid fluid, Direction direction) {

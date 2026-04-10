@@ -5,7 +5,7 @@ Subject: [PATCH] Collide with non-solid blocks
 
 
 diff --git a/ca/spottedleaf/moonrise/patches/collisions/CollisionUtil.java b/ca/spottedleaf/moonrise/patches/collisions/CollisionUtil.java
-index 4c18fcd50c79e767bfea908ca6660b667f9d359b..5d95d8747c4816d27bab6455b3bdfb7b50ae265f 100644
+index ce13de98e45782a7042e6f232431605a64adb668..04168dc7010fe07c5f11d9e23fb2ffb4d2cb17ee 100644
 --- a/ca/spottedleaf/moonrise/patches/collisions/CollisionUtil.java
 +++ b/ca/spottedleaf/moonrise/patches/collisions/CollisionUtil.java
 @@ -1906,6 +1906,7 @@ public final class CollisionUtil {
@@ -46,10 +46,10 @@ index 4c18fcd50c79e767bfea908ca6660b667f9d359b..5d95d8747c4816d27bab6455b3bdfb7b
                                          blockCollision = blockData.getCollisionShape(world, mutablePos, collisionShape);
                                      }
 diff --git a/net/minecraft/world/entity/Entity.java b/net/minecraft/world/entity/Entity.java
-index a372898853b3d72c9c5457a54a35d7ac433788c2..56da24763d2d00fb12e75a05673bd61ede4554eb 100644
+index dfd4d65e65e385c30c348d3bebdcf99b93402bae..d0327e83c63d2a9bee885f161d1e8f3531bcb29a 100644
 --- a/net/minecraft/world/entity/Entity.java
 +++ b/net/minecraft/world/entity/Entity.java
-@@ -551,6 +551,14 @@ public abstract class Entity implements SyncedDataHolder, DebugValueSource, Name
+@@ -552,6 +552,14 @@ public abstract class Entity implements SyncedDataHolder, DebugValueSource, Name
              flags |= ca.spottedleaf.moonrise.patches.collisions.CollisionUtil.COLLISION_FLAG_ADD_TICKET;
          }
  

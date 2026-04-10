@@ -5,10 +5,10 @@ Subject: [PATCH] Client Visibility Settings
 
 
 diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
-index 97cba43380ec767d1e6530fafd0c2e2158ca3973..5a28cbcd2dd475b6d74993dfcba08303b005db20 100644
+index ddb58c7ebf3d7e50e378f93dd1d89ffa7cee8c9c..640967abce057fb04c8df10dc64a4d4376ffd127 100644
 --- a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
-@@ -2254,6 +2254,11 @@ public class CraftPlayer extends CraftHumanEntity implements Player, PluginMessa
+@@ -2250,6 +2250,11 @@ public class CraftPlayer extends CraftHumanEntity implements Player, PluginMessa
              handle.expToDrop = data.getIntOr("expToDrop", 0);
              handle.keepLevel = data.getBooleanOr("keepLevel", false);
          });
@@ -20,7 +20,7 @@ index 97cba43380ec767d1e6530fafd0c2e2158ca3973..5a28cbcd2dd475b6d74993dfcba08303
      }
  
      public void setExtraData(ValueOutput output) {
-@@ -2275,6 +2280,10 @@ public class CraftPlayer extends CraftHumanEntity implements Player, PluginMessa
+@@ -2271,6 +2276,10 @@ public class CraftPlayer extends CraftHumanEntity implements Player, PluginMessa
          paper.putLong("LastLogin", handle.loginTime);
          paper.putLong("LastSeen", System.currentTimeMillis());
          // Paper end
@@ -31,7 +31,7 @@ index 97cba43380ec767d1e6530fafd0c2e2158ca3973..5a28cbcd2dd475b6d74993dfcba08303
      }
  
      @Override
-@@ -2864,6 +2873,13 @@ public class CraftPlayer extends CraftHumanEntity implements Player, PluginMessa
+@@ -2868,6 +2877,13 @@ public class CraftPlayer extends CraftHumanEntity implements Player, PluginMessa
          return this.getHandle().allowsListing();
      }
  
