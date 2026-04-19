@@ -1,11 +1,48 @@
 --- a/net/minecraft/world/entity/Mob.java
 +++ b/net/minecraft/world/entity/Mob.java
-@@ -815,7 +_,7 @@
-     protected final void serverAiStep() {
-         this.noActionTime++;
-         // Paper start - Allow nerfed mobs to jump and float
--        if (!this.aware) {
-+        if (!this.aware || this.level().sakuraConfig().entity.disableMobAi) { // Sakura - add option to disable entity ai
-             if (this.goalFloat != null) {
-                 if (this.goalFloat.canUse()) this.goalFloat.tick();
-                 this.getJumpControl().tick();
+@@ -152,6 +_,25 @@
+     public net.kyori.adventure.util.TriState despawnInPeacefulOverride = net.kyori.adventure.util.TriState.NOT_SET; // Paper - allow changing despawnInPeaceful
+     public int ticksSinceLastInteraction; // Purpur - Entity lifespan
+ 
++    // Sakura start - simplify nerfed mob logic
++    private boolean isAwareOnGroundOrSwimming() {
++        return this.aware
++            || this.verticalCollision
++            || this.isInWater()
++            || this.getDeltaMovement().y > 0.0;
++    }
++
++    @Override
++    protected boolean updateInWaterStateAndDoFluidPushing() {
++        return this.isAwareOnGroundOrSwimming() && super.updateInWaterStateAndDoFluidPushing();
++    }
++
++    @Override
++    public boolean isInWall() {
++        return this.isAwareOnGroundOrSwimming() && super.isInWall();
++    }
++    // Sakura end - simplify nerfed mob logic
++
+     protected Mob(EntityType<? extends Mob> type, Level level) {
+         super(type, level);
+         this.goalSelector = new GoalSelector();
+@@ -165,6 +_,11 @@
+         if (level instanceof ServerLevel) {
+             this.registerGoals();
+         }
++        // Sakura start - add disable mob ai
++        if (this.level().sakuraConfig().entity.disableMobAi) {
++            this.aware = false;
++        }
++        // Sakura end - end disable mob ai
+     }
+ 
+     // CraftBukkit start
+@@ -222,6 +_,7 @@
+     @Override
+     public void inactiveTick() {
+         super.inactiveTick();
++        if (!this.aware) return; // Sakura - fix nerfed mobs ticking goals while inactive
+         if (this.goalSelector.inactiveTick()) {
+             this.goalSelector.tick();
+         }

@@ -153,10 +153,10 @@ index 3a817c92147bb78c60238f3ddc1644b721aed7a2..ade441685b3513e48d4f29ef8fe74e89
  
          if (this.entity instanceof LivingEntity) {
 diff --git a/net/minecraft/world/entity/Entity.java b/net/minecraft/world/entity/Entity.java
-index 06b0709a9ba8a594973cb11597ca63ae0a13d14f..b8f340dc038163880e81629c5a08c4c741108be9 100644
+index 9b332e7c37cd808d9d287f89ed0be891e3af85a3..995c4fb34c5106d8fa1efc3809ecd01d4db88f87 100644
 --- a/net/minecraft/world/entity/Entity.java
 +++ b/net/minecraft/world/entity/Entity.java
-@@ -3782,7 +3782,7 @@ public abstract class Entity implements SyncedDataHolder, DebugValueSource, Name
+@@ -3786,7 +3786,7 @@ public abstract class Entity implements SyncedDataHolder, DebugValueSource, Name
              this.entityData.markDirty(DATA_AIR_SUPPLY_ID);
              return;
          }
@@ -166,10 +166,10 @@ index 06b0709a9ba8a594973cb11597ca63ae0a13d14f..b8f340dc038163880e81629c5a08c4c7
      }
  
 diff --git a/net/minecraft/world/entity/item/FallingBlockEntity.java b/net/minecraft/world/entity/item/FallingBlockEntity.java
-index 14537ff56b471adab08eddd96dc85587e6dd7828..a14e431948264c4b99be49669322f530119c3d87 100644
+index 85b00bc20ac30ad2b743bcb6e8baea3ba875cbc1..1cbb3147f40cd0cccd1827edd8d18c8c3de3fb16 100644
 --- a/net/minecraft/world/entity/item/FallingBlockEntity.java
 +++ b/net/minecraft/world/entity/item/FallingBlockEntity.java
-@@ -143,7 +143,7 @@ public class FallingBlockEntity extends Entity {
+@@ -151,7 +151,7 @@ public class FallingBlockEntity extends Entity {
      }
  
      public void setStartPos(BlockPos startPos) {
@@ -179,7 +179,7 @@ index 14537ff56b471adab08eddd96dc85587e6dd7828..a14e431948264c4b99be49669322f530
  
      public BlockPos getStartPos() {
 diff --git a/net/minecraft/world/entity/item/PrimedTnt.java b/net/minecraft/world/entity/item/PrimedTnt.java
-index 954745dfa4a4bba44a13cfb1300dbd499b095766..5e70f5d8dbf96ccfc80fcb4323e3c0d0c4361d22 100644
+index b0adea37be6f02fda78218d21a47e8980f0bdc4a..d58b9213bd0a5767c48bb56a25062eed0ba55545 100644
 --- a/net/minecraft/world/entity/item/PrimedTnt.java
 +++ b/net/minecraft/world/entity/item/PrimedTnt.java
 @@ -226,7 +226,11 @@ public class PrimedTnt extends Entity implements TraceableEntity {

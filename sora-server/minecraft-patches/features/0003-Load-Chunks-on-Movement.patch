@@ -62,7 +62,7 @@ index 6d5bfc6e26932ba1d22b339b4bcadd2cce00c989..d65268ee0d87ab3ea4b50dd1c8c45708
      private static TicketType register(String name, long timeout, @TicketType.Flags int flags) {
          return Registry.register(BuiltInRegistries.TICKET_TYPE, name, new TicketType(timeout, flags));
 diff --git a/net/minecraft/world/entity/Entity.java b/net/minecraft/world/entity/Entity.java
-index ddc9d6fb4427582c68a7deba639592ab9c8c0d35..06b0709a9ba8a594973cb11597ca63ae0a13d14f 100644
+index 5ec91beccb398630d3288693021fb9ec65b374e3..9b332e7c37cd808d9d287f89ed0be891e3af85a3 100644
 --- a/net/minecraft/world/entity/Entity.java
 +++ b/net/minecraft/world/entity/Entity.java
 @@ -542,6 +542,19 @@ public abstract class Entity implements SyncedDataHolder, DebugValueSource, Name
@@ -85,7 +85,7 @@ index ddc9d6fb4427582c68a7deba639592ab9c8c0d35..06b0709a9ba8a594973cb11597ca63ae
  
      // Purpur start - Add canSaveToDisk to Entity
      public boolean canSaveToDisk() {
-@@ -1592,7 +1605,7 @@ public abstract class Entity implements SyncedDataHolder, DebugValueSource, Name
+@@ -1596,7 +1609,7 @@ public abstract class Entity implements SyncedDataHolder, DebugValueSource, Name
  
          ca.spottedleaf.moonrise.patches.collisions.CollisionUtil.getCollisionsForBlocksOrWorldBorder(
              this.level, (Entity)(Object)this, initialCollisionBox, potentialCollisionsVoxel, potentialCollisionsBB,
@@ -94,7 +94,7 @@ index ddc9d6fb4427582c68a7deba639592ab9c8c0d35..06b0709a9ba8a594973cb11597ca63ae
          );
          potentialCollisionsBB.addAll(entityAABBs);
          final Vec3 collided = ca.spottedleaf.moonrise.patches.collisions.CollisionUtil.performCollisions(movement, currentBox, potentialCollisionsVoxel, potentialCollisionsBB);
-@@ -5302,13 +5315,14 @@ public abstract class Entity implements SyncedDataHolder, DebugValueSource, Name
+@@ -5306,13 +5319,14 @@ public abstract class Entity implements SyncedDataHolder, DebugValueSource, Name
      @Override
      public boolean shouldBeSaved() {
          return (this.removalReason == null || this.removalReason.shouldSave())
@@ -111,7 +111,7 @@ index ddc9d6fb4427582c68a7deba639592ab9c8c0d35..06b0709a9ba8a594973cb11597ca63ae
  
      public boolean mayInteract(ServerLevel level, BlockPos pos) {
 diff --git a/net/minecraft/world/entity/item/FallingBlockEntity.java b/net/minecraft/world/entity/item/FallingBlockEntity.java
-index 9caf04e20bed7a21ed61d12c94af7047fdf73673..14537ff56b471adab08eddd96dc85587e6dd7828 100644
+index b427da59555a698fef8243380c60d190c6839bf4..85b00bc20ac30ad2b743bcb6e8baea3ba875cbc1 100644
 --- a/net/minecraft/world/entity/item/FallingBlockEntity.java
 +++ b/net/minecraft/world/entity/item/FallingBlockEntity.java
 @@ -79,6 +79,7 @@ public class FallingBlockEntity extends Entity {
@@ -123,7 +123,7 @@ index 9caf04e20bed7a21ed61d12c94af7047fdf73673..14537ff56b471adab08eddd96dc85587
  
      public FallingBlockEntity(Level level, double x, double y, double z, BlockState state) {
 diff --git a/net/minecraft/world/entity/item/PrimedTnt.java b/net/minecraft/world/entity/item/PrimedTnt.java
-index dcc3354d3d1d0a736898762396cc4b76a8454f93..954745dfa4a4bba44a13cfb1300dbd499b095766 100644
+index d5cdba353056ff4ffe8a895b741cd9c91f84ea73..b0adea37be6f02fda78218d21a47e8980f0bdc4a 100644
 --- a/net/minecraft/world/entity/item/PrimedTnt.java
 +++ b/net/minecraft/world/entity/item/PrimedTnt.java
 @@ -63,6 +63,7 @@ public class PrimedTnt extends Entity implements TraceableEntity {

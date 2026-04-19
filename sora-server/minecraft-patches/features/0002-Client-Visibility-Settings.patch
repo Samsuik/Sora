@@ -4,6 +4,18 @@ Date: Tue, 21 Sep 2021 23:54:25 +0100
 Subject: [PATCH] Client Visibility Settings
 
 
+diff --git a/me/samsuik/sakura/scheduler/ScheduleSakuraTasks.java b/me/samsuik/sakura/scheduler/ScheduleSakuraTasks.java
+index 617a4bf9479364f2e234c7c73ba77806f8b8c679..f7e8320006171fadde78afaa4c89373292ab13de 100644
+--- a/me/samsuik/sakura/scheduler/ScheduleSakuraTasks.java
++++ b/me/samsuik/sakura/scheduler/ScheduleSakuraTasks.java
+@@ -8,6 +8,6 @@ import org.jspecify.annotations.NullMarked;
+ @NullMarked
+ public final class ScheduleSakuraTasks {
+     public static void schedule(final LevelTickScheduler scheduler) {
+-
++        scheduler.endless((tick, level, cb) -> level.explosionPositions.clear(), 0); // Sakura - client visibility settings
+     }
+ }
 diff --git a/net/minecraft/network/protocol/game/ClientboundLevelChunkPacketData.java b/net/minecraft/network/protocol/game/ClientboundLevelChunkPacketData.java
 index 19547e22620f16d01f05bbd13a4dcb9c0df636df..a0990cd49bd05421cbf1baa2d96fc674cc02700f 100644
 --- a/net/minecraft/network/protocol/game/ClientboundLevelChunkPacketData.java
@@ -109,7 +121,7 @@ index 3a2461b2221243e8db9b1bc6c74c498c552a766a..353d8980f7b2c54806932347a3aa8f89
                  if (flag && !player.getBukkitEntity().canSee(this.entity.getBukkitEntity())) { // Paper - only consider hits
                      flag = false;
 diff --git a/net/minecraft/server/level/ServerLevel.java b/net/minecraft/server/level/ServerLevel.java
-index 24ab6baa2dae923bffc7c121e16f0f4ff2bdda51..e9ec9271d50f6c317f4a3f87866cf20c7d14a61d 100644
+index 254a0ecdf1ca0f1dba7537f103cd287ef5c6169a..03ab1e662105637957cfb31b3ceb71d5e841a505 100644
 --- a/net/minecraft/server/level/ServerLevel.java
 +++ b/net/minecraft/server/level/ServerLevel.java
 @@ -600,6 +600,22 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
@@ -135,15 +147,7 @@ index 24ab6baa2dae923bffc7c121e16f0f4ff2bdda51..e9ec9271d50f6c317f4a3f87866cf20c
  
      public ServerLevel(
          MinecraftServer server,
-@@ -730,6 +746,7 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
-         // Paper end - rewrite chunk system
-         this.getCraftServer().addWorld(this.getWorld()); // CraftBukkit
-         this.preciseTime = this.serverLevelData.getDayTime(); // Purpur - Configurable daylight cycle
-+        this.levelTickScheduler.repeatingTask(this.explosionPositions::clear, 0); // Sakura - client visibility settings
-     }
- 
-     // Paper start
-@@ -2071,7 +2088,20 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
+@@ -2072,7 +2088,20 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
          for (ServerPlayer serverPlayer : this.players) {
              if (serverPlayer.distanceToSqr(vec3) < 4096.0) {
                  Optional<Vec3> optional = Optional.ofNullable(serverExplosion.getHitPlayers().get(serverPlayer));
@@ -268,7 +272,7 @@ index 91f9739bf34b824c5955ad0a9ef04dcb7c2e6736..c75617879f0d89e724c0490cb903c6eb
                          if (this.player.containerMenu != oldContainer) {
                              this.player.containerMenu.resumeRemoteUpdates();
 diff --git a/net/minecraft/world/entity/Entity.java b/net/minecraft/world/entity/Entity.java
-index 37476212ddcf4447a1b619f71bc225fb3b724d89..ddc9d6fb4427582c68a7deba639592ab9c8c0d35 100644
+index a110e2b9c7e9416c9c20c8f091384413296ea6f6..5ec91beccb398630d3288693021fb9ec65b374e3 100644
 --- a/net/minecraft/world/entity/Entity.java
 +++ b/net/minecraft/world/entity/Entity.java
 @@ -538,6 +538,10 @@ public abstract class Entity implements SyncedDataHolder, DebugValueSource, Name
@@ -283,7 +287,7 @@ index 37476212ddcf4447a1b619f71bc225fb3b724d89..ddc9d6fb4427582c68a7deba639592ab
      // Purpur start - Add canSaveToDisk to Entity
      public boolean canSaveToDisk() {
 diff --git a/net/minecraft/world/entity/item/FallingBlockEntity.java b/net/minecraft/world/entity/item/FallingBlockEntity.java
-index a696df7e358a8547520ee55fa7a754dfc23c4b2e..9caf04e20bed7a21ed61d12c94af7047fdf73673 100644
+index 0b52ec757108fbe0b28faf0b8aef226fc8540b2c..b427da59555a698fef8243380c60d190c6839bf4 100644
 --- a/net/minecraft/world/entity/item/FallingBlockEntity.java
 +++ b/net/minecraft/world/entity/item/FallingBlockEntity.java
 @@ -78,6 +78,7 @@ public class FallingBlockEntity extends Entity {
@@ -295,7 +299,7 @@ index a696df7e358a8547520ee55fa7a754dfc23c4b2e..9caf04e20bed7a21ed61d12c94af7047
  
      public FallingBlockEntity(Level level, double x, double y, double z, BlockState state) {
 diff --git a/net/minecraft/world/entity/item/PrimedTnt.java b/net/minecraft/world/entity/item/PrimedTnt.java
-index 1c896239d2e476636a09f9b3bf6a4ae08579e264..dcc3354d3d1d0a736898762396cc4b76a8454f93 100644
+index ecd3cffd72cfa9bfb76f9ace4a59f2fa1753951e..d5cdba353056ff4ffe8a895b741cd9c91f84ea73 100644
 --- a/net/minecraft/world/entity/item/PrimedTnt.java
 +++ b/net/minecraft/world/entity/item/PrimedTnt.java
 @@ -62,6 +62,7 @@ public class PrimedTnt extends Entity implements TraceableEntity {

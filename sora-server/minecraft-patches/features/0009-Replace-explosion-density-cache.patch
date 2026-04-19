@@ -4,32 +4,31 @@ Date: Mon, 22 Apr 2024 23:01:26 +0100
 Subject: [PATCH] Replace explosion density cache
 
 
-diff --git a/net/minecraft/server/level/ServerLevel.java b/net/minecraft/server/level/ServerLevel.java
-index 2d64f39161c3f74a7ea0ed354a854e3c1dc721da..4f542676f45b42487c2b2f447470621360ff3732 100644
---- a/net/minecraft/server/level/ServerLevel.java
-+++ b/net/minecraft/server/level/ServerLevel.java
-@@ -748,6 +748,7 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
-         this.preciseTime = this.serverLevelData.getDayTime(); // Purpur - Configurable daylight cycle
-         this.levelTickScheduler.repeatingTask(this.explosionPositions::clear, 0); // Sakura - client visibility settings
-         this.levelTickScheduler.repeatingTask(this.mergeHandler::expire, 200); // Sakura - merge cannon entities
-+        this.levelTickScheduler.repeatingTask(this.densityCache::expire, 0); // Sakura - explosion density cache
+diff --git a/me/samsuik/sakura/scheduler/ScheduleSakuraTasks.java b/me/samsuik/sakura/scheduler/ScheduleSakuraTasks.java
+index d42b73fa20025d7a05171e301a115424dc1bbb9f..4c456c2d1b42ecfcecb22ba2bf3819cab68206b8 100644
+--- a/me/samsuik/sakura/scheduler/ScheduleSakuraTasks.java
++++ b/me/samsuik/sakura/scheduler/ScheduleSakuraTasks.java
+@@ -10,5 +10,6 @@ public final class ScheduleSakuraTasks {
+     public static void schedule(final LevelTickScheduler scheduler) {
+         scheduler.endless((tick, level, cb) -> level.explosionPositions.clear(), 0); // Sakura - client visibility settings
+         scheduler.endless((tick, level, cb) -> level.mergeHandler.expire(tick), 200); // Sakura - merge cannon entities
++        scheduler.endless((tick, level, cb) -> level.densityCache.expire(tick), 0); // Sakura - explosion density cache
      }
- 
-     // Paper start
+ }
 diff --git a/net/minecraft/world/level/Level.java b/net/minecraft/world/level/Level.java
-index 1cfa78aa71c38921f80b8b56a2169e7c2f54e37e..20cca604462177987ef40f0ed8d81f11611da114 100644
+index 2694730c253f267b0dacc38b57702ec1af00b410..cef6be55602f97b967cf99c09fb1b428ee02e3d7 100644
 --- a/net/minecraft/world/level/Level.java
 +++ b/net/minecraft/world/level/Level.java
-@@ -878,6 +878,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable, ca.spottedl
-     public final me.samsuik.sakura.block_change.BlockStateChangeTracker blockStateChangeTracker = new me.samsuik.sakura.block_change.BlockStateChangeTracker(this);
-     // Sakura end - track block changes and tick scheduler
+@@ -883,6 +883,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable, ca.spottedl
+     }
+     // Sakura end - implement state watchers and tick scheduler
      public final me.samsuik.sakura.entity.merge.EntityMergeHandler mergeHandler = new me.samsuik.sakura.entity.merge.EntityMergeHandler(); // Sakura - merge cannon entities
 +    public final me.samsuik.sakura.explosion.density.BlockDensityCache densityCache = new me.samsuik.sakura.explosion.density.BlockDensityCache(this); // Sakura - optimise explosion density cache
  
      protected Level(
          WritableLevelData levelData,
 diff --git a/net/minecraft/world/level/ServerExplosion.java b/net/minecraft/world/level/ServerExplosion.java
-index af3f2da01c5a7e1ff82ad5b22a8f10ac2304ac87..35acf7d1179d515269c847f9a1a69ca1e9c38e28 100644
+index af3f2da01c5a7e1ff82ad5b22a8f10ac2304ac87..49759ce46c9bf0a1e9bffe2e56c33c1e7ad05058 100644
 --- a/net/minecraft/world/level/ServerExplosion.java
 +++ b/net/minecraft/world/level/ServerExplosion.java
 @@ -296,7 +296,12 @@ public class ServerExplosion implements Explosion {
@@ -70,7 +69,7 @@ index af3f2da01c5a7e1ff82ad5b22a8f10ac2304ac87..35acf7d1179d515269c847f9a1a69ca1
          }
          // CraftBukkit end
 +        // Sakura start - explosion density cache
-+        if (!blocks.isEmpty() && !this.level.paperConfig().environment.optimizeExplosions) {
++        if (!blocks.isEmpty() && !this.level.sakuraConfig().cannons.mechanics.useBrokenPaperExplosionBehaviour(this.level)) {
 +            this.level.densityCache.invalidate();
 +        }
 +        // Sakura end - explosion density cache
@@ -98,7 +97,7 @@ index af3f2da01c5a7e1ff82ad5b22a8f10ac2304ac87..35acf7d1179d515269c847f9a1a69ca1
  
          return blockDensity;
 diff --git a/net/minecraft/world/level/block/BasePressurePlateBlock.java b/net/minecraft/world/level/block/BasePressurePlateBlock.java
-index 77f30569214d97d5de1ded3cf20491d70a5be405..7c5714c7418f0b783f478f48f6d76884041a416c 100644
+index 77f30569214d97d5de1ded3cf20491d70a5be405..d7530742950902dc642be748eeb9e5418396e496 100644
 --- a/net/minecraft/world/level/block/BasePressurePlateBlock.java
 +++ b/net/minecraft/world/level/block/BasePressurePlateBlock.java
 @@ -107,6 +107,11 @@ public abstract class BasePressurePlateBlock extends Block {
@@ -106,7 +105,7 @@ index 77f30569214d97d5de1ded3cf20491d70a5be405..7c5714c7418f0b783f478f48f6d76884
          if (currentSignal != signalStrength) {
              BlockState blockState = this.setSignalForState(state, signalStrength);
 +            // Sakura start - explosion density cache
-+            if (!level.paperConfig().environment.optimizeExplosions) {
++            if (!level.sakuraConfig().cannons.mechanics.useBrokenPaperExplosionBehaviour(level)) {
 +                level.densityCache.invalidate();
 +            }
 +            // Sakura end - explosion density cache
@@ -114,7 +113,7 @@ index 77f30569214d97d5de1ded3cf20491d70a5be405..7c5714c7418f0b783f478f48f6d76884
              this.updateNeighbours(level, pos);
              level.setBlocksDirty(pos, state, blockState);
 diff --git a/net/minecraft/world/level/block/TripWireHookBlock.java b/net/minecraft/world/level/block/TripWireHookBlock.java
-index 292fe41967db74884e5937cb125f1e022ccfb6bd..28869577e480318b5ef469a0b4180b25ddfb627f 100644
+index 292fe41967db74884e5937cb125f1e022ccfb6bd..894f5893e60a1a77c7311d9a3cb88515357bfffd 100644
 --- a/net/minecraft/world/level/block/TripWireHookBlock.java
 +++ b/net/minecraft/world/level/block/TripWireHookBlock.java
 @@ -167,6 +167,11 @@ public class TripWireHookBlock extends Block {
@@ -122,7 +121,7 @@ index 292fe41967db74884e5937cb125f1e022ccfb6bd..28869577e480318b5ef469a0b4180b25
                  // Paper end - Call BlockRedstoneEvent
                  Direction opposite = direction.getOpposite();
 +                // Sakura start - explosion density cache
-+                if (!level.paperConfig().environment.optimizeExplosions) {
++                if (!level.sakuraConfig().cannons.mechanics.useBrokenPaperExplosionBehaviour(level)) {
 +                    level.densityCache.invalidate();
 +                }
 +                // Sakura end - explosion density cache

@@ -15,6 +15,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.util.Util;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import org.slf4j.Logger;
@@ -116,6 +117,18 @@ public final class WorldConfiguration extends ConfigurationPart {
             public boolean tntFlowsInWater = true;
             public boolean fallingBlockParity = false;
             public MinecraftMechanicsTarget mechanicsTarget = MinecraftMechanicsTarget.latest();
+            public boolean fallingBlockFloatingPointFix = false;
+
+            @Comment(
+                "Replaces the optimize-explosions option in the paper config." +
+                "In Sakura it's a misleading option that hurts performance and breaks cannons."
+            )
+            public boolean brokenPaperExplosionBehaviour = false;
+
+            public final boolean useBrokenPaperExplosionBehaviour(final Level level) {
+                return level.paperConfig().environment.optimizeExplosions && this.mechanicsTarget.isLegacy()
+                    || this.brokenPaperExplosionBehaviour;
+            }
 
             public enum TNTSpread {
                 ALL, Y, NONE;
@@ -206,6 +219,8 @@ public final class WorldConfiguration extends ConfigurationPart {
         public boolean waterSensitivity = true;
         public boolean instantDeathAnimation = false;
         public boolean ironGolemsTakeFalldamage = false;
+        public boolean insertItemsIntoHoppersOnDeath = false;
+        public boolean nerfedMobsCanPushEntities = false;
 
         public Items items = new Items();
         public class Items extends ConfigurationPart {
@@ -257,6 +272,7 @@ public final class WorldConfiguration extends ConfigurationPart {
         public Crops crops = new Crops();
         public class Crops extends ConfigurationPart {
             public boolean useRandomChanceToGrow = false;
+            public IntOr.Default minCactusFlowerGrowthHeight = IntOr.Default.USE_DEFAULT;
         }
 
         public MobSpawner mobSpawner = new MobSpawner();

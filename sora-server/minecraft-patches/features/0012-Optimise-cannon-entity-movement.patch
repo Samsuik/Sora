@@ -5,7 +5,7 @@ Subject: [PATCH] Optimise cannon entity movement
 
 
 diff --git a/net/minecraft/world/entity/Entity.java b/net/minecraft/world/entity/Entity.java
-index 3b4b051bcdf4306cbc965304fda589ea73dbf282..936d6b51439d60f276ae4c7ecd4071e44d55c310 100644
+index aba5f7d1db46738bf1fb0304acf3d0b355a1d78d..8077ad50efa61acea10aab451d51966adfae0773 100644
 --- a/net/minecraft/world/entity/Entity.java
 +++ b/net/minecraft/world/entity/Entity.java
 @@ -1251,7 +1251,7 @@ public abstract class Entity implements SyncedDataHolder, DebugValueSource, Name
@@ -17,7 +17,7 @@ index 3b4b051bcdf4306cbc965304fda589ea73dbf282..936d6b51439d60f276ae4c7ecd4071e4
                      double min = Math.min(vec3.length(), 8.0);
                      Vec3 vec31 = this.position().add(vec3.normalize().scale(min));
                      BlockHitResult blockHitResult = this.level()
-@@ -1610,6 +1610,132 @@ public abstract class Entity implements SyncedDataHolder, DebugValueSource, Name
+@@ -1614,6 +1614,132 @@ public abstract class Entity implements SyncedDataHolder, DebugValueSource, Name
          return list.isEmpty() ? distance : -Shapes.collide(Direction.Axis.Y, boundingBox, list, -distance);
      }
  
@@ -151,7 +151,7 @@ index 3b4b051bcdf4306cbc965304fda589ea73dbf282..936d6b51439d60f276ae4c7ecd4071e4
      protected Vec3 collide(Vec3 movement) {
          final boolean xZero = movement.x == 0.0;
 diff --git a/net/minecraft/world/entity/item/FallingBlockEntity.java b/net/minecraft/world/entity/item/FallingBlockEntity.java
-index afd6e062422943e053af594613beb09b40c8a00b..3a29066910bd3b068beb56d807abf1b82a3ffa8a 100644
+index c0092f709789611da912de16990dc2b33a6efffd..59d62722158b9fd663369ed547f302a7253b90db 100644
 --- a/net/minecraft/world/entity/item/FallingBlockEntity.java
 +++ b/net/minecraft/world/entity/item/FallingBlockEntity.java
 @@ -123,6 +123,12 @@ public class FallingBlockEntity extends Entity implements me.samsuik.sakura.enti
@@ -168,7 +168,7 @@ index afd6e062422943e053af594613beb09b40c8a00b..3a29066910bd3b068beb56d807abf1b8
      public FallingBlockEntity(EntityType<? extends FallingBlockEntity> type, Level level) {
          super(type, level);
 diff --git a/net/minecraft/world/entity/item/PrimedTnt.java b/net/minecraft/world/entity/item/PrimedTnt.java
-index 26785d7d7004f3c1a3d8d7f22c0561136bfae741..c3e9a84add3d55befffd6b1141a921790f65041e 100644
+index a47de3150455a638ab3bf237ef3cad227377a953..8319f5edb9b9d73b6c17ceb2bff0dc0b9680b898 100644
 --- a/net/minecraft/world/entity/item/PrimedTnt.java
 +++ b/net/minecraft/world/entity/item/PrimedTnt.java
 @@ -81,6 +81,12 @@ public class PrimedTnt extends Entity implements TraceableEntity, me.samsuik.sak
