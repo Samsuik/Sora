@@ -1,0 +1,55 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Samsuik <kfian294ma4@gmail.com>
+Date: Thu, 30 Nov 2023 15:54:49 +0000
+Subject: [PATCH] Reduce entity tracker player updates
+
+
+diff --git a/net/minecraft/server/level/ChunkMap.java b/net/minecraft/server/level/ChunkMap.java
+index 87441a0345943ec843e55505f859b456765c8aab..f47bf090b06ce2e4d73471daad2f8d20a36c0ad0 100644
+--- a/net/minecraft/server/level/ChunkMap.java
++++ b/net/minecraft/server/level/ChunkMap.java
+@@ -1047,7 +1047,11 @@ public class ChunkMap extends SimpleRegionStorage implements ChunkHolder.PlayerP
+             if (tracker == null) {
+                 continue;
+             }
+-            ((ca.spottedleaf.moonrise.patches.entity_tracker.EntityTrackerTrackedEntity)tracker).moonrise$tick(((ca.spottedleaf.moonrise.patches.chunk_system.entity.ChunkSystemEntity)entity).moonrise$getChunkData().nearbyPlayers);
++            // Sakura start - reduce entity tracker player updates
++            if (tracker.shouldUpdatePlayers()) {
++                ((ca.spottedleaf.moonrise.patches.entity_tracker.EntityTrackerTrackedEntity)tracker).moonrise$tick(((ca.spottedleaf.moonrise.patches.chunk_system.entity.ChunkSystemEntity)entity).moonrise$getChunkData().nearbyPlayers);
++            }
++            // Sakura end - reduce entity tracker player updates
+             if (((ca.spottedleaf.moonrise.patches.entity_tracker.EntityTrackerTrackedEntity)tracker).moonrise$hasPlayers()
+                 || ((ca.spottedleaf.moonrise.patches.chunk_system.entity.ChunkSystemEntity)entity).moonrise$getChunkStatus().isOrAfter(FullChunkStatus.ENTITY_TICKING)) {
+                 tracker.serverEntity.sendChanges();
+@@ -1293,6 +1297,20 @@ public class ChunkMap extends SimpleRegionStorage implements ChunkHolder.PlayerP
+             return !this.seenBy.isEmpty();
+         }
+         // Paper end - optimise entity tracker
++        // Sakura start - reduce entity tracker player updates
++        private final int playerUpdateInterval;
++        private net.minecraft.world.phys.Vec3 entityPosition;
++
++        public final boolean shouldUpdatePlayers() {
++            // Always update players otherwise they sometimes turn invisible when teleporting
++            if (this.entity instanceof net.minecraft.world.entity.player.Player || this.entity.tickCount % this.playerUpdateInterval == 0) {
++                return true;
++            }
++            final net.minecraft.world.phys.Vec3 lastPosition = this.entityPosition;
++            this.entityPosition = this.entity.position();
++            return this.entity.position().distanceToSqr(lastPosition) >= (double) this.range / 2.0;
++        }
++        // Sakura start - reduce entity tracker player updates
+ 
+         public TrackedEntity(final Entity entity, final int range, final int updateInterval, final boolean trackDelta) {
+             Objects.requireNonNull(ChunkMap.this);
+@@ -1302,6 +1320,10 @@ public class ChunkMap extends SimpleRegionStorage implements ChunkHolder.PlayerP
+             this.entity = entity;
+             this.range = range;
+             this.lastSectionPos = SectionPos.of(entity);
++            // Sakura start - reduce entity tracker player updates
++            this.playerUpdateInterval = Math.min(updateInterval, 20);
++            this.entityPosition = entity.position();
++            // Sakura end - reduce entity tracker player updates
+         }
+ 
+         @Override

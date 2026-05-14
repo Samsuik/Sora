@@ -10,7 +10,8 @@ import org.bukkit.util.BoundingBox;
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
 
 @NullMarked
 public final class LocalConfiguration implements LocalConfigurationAccessor {

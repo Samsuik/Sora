@@ -1,36 +1,27 @@
 --- a/net/minecraft/world/entity/item/PrimedTnt.java
 +++ b/net/minecraft/world/entity/item/PrimedTnt.java
-@@ -74,7 +_,28 @@
+@@ -64,6 +_,7 @@
+     public PrimedTnt(final EntityType<? extends PrimedTnt> type, final Level level) {
+         super(type, level);
+         this.blocksBuilding = true;
++        this.cannonEntity = true; // Sakura - add cannon entity field
+     }
+ 
+     public PrimedTnt(final Level level, final double x, final double y, final double z, final @Nullable LivingEntity owner) {
+@@ -76,6 +_,12 @@
          this.yo = y;
          this.zo = z;
          this.owner = EntityReference.of(owner);
--    }
 +        // Sakura start - configure cannon mechanics
 +        switch (level.sakuraConfig().cannons.mechanics.tntSpread) {
 +            case NONE -> this.setDeltaMovement(0.0, 0.0, 0.0);
 +            case Y -> this.setDeltaMovement(this.getDeltaMovement().multiply(0.0, 1.0, 0.0));
 +        }
 +        // Sakura end - configure cannon mechanics
-+    }
-+
-+    // Sakura start - optimise tnt fluid state
-+    @Override
-+    protected final boolean updateInWaterStateAndDoFluidPushing() {
-+        if (this.isPushedByFluid()) {
-+            return super.updateInWaterStateAndDoFluidPushing();
-+        } else {
-+            // super method also handles lava fluid pushing
-+            // we only need to search for water to negate fall distance
-+            this.fluidHeight.clear();
-+            this.updateInWaterStateAndDoWaterCurrentPushing();
-+            return this.isInWater();
-+        }
-+    }
-+    // Sakura end - optimise tnt fluid state
+     }
  
      @Override
-     protected void defineSynchedData(SynchedEntityData.Builder builder) {
-@@ -99,7 +_,7 @@
+@@ -101,7 +_,7 @@
  
      @Override
      public void tick() {
@@ -39,7 +30,7 @@
          this.handlePortal();
          this.applyGravity();
          this.move(MoverType.SELF, this.getDeltaMovement());
-@@ -131,8 +_,16 @@
+@@ -133,8 +_,16 @@
                  this.level().addParticle(ParticleTypes.SMOKE, this.getX(), this.getY() + 0.5, this.getZ(), 0.0, 0.0, 0.0);
              }
          }
@@ -57,7 +48,7 @@
              this.hurtMarked = true;
              this.needsSync = true;
          }
-@@ -232,7 +_,7 @@
+@@ -234,7 +_,7 @@
      // Paper start - Option to prevent TNT from moving in water
      @Override
      public boolean isPushedByFluid() {

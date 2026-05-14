@@ -173,10 +173,10 @@ index 0000000000000000000000000000000000000000..c54ab20ad4becccd3ec8360a2976b178
 +}
 diff --git a/me/samsuik/sakura/scheduler/ScheduleSakuraTasks.java b/me/samsuik/sakura/scheduler/ScheduleSakuraTasks.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..617a4bf9479364f2e234c7c73ba77806f8b8c679
+index 0000000000000000000000000000000000000000..c3060d4602a062b4d1713bfb9def2686c4b7a4c7
 --- /dev/null
 +++ b/me/samsuik/sakura/scheduler/ScheduleSakuraTasks.java
-@@ -0,0 +1,13 @@
+@@ -0,0 +1,12 @@
 +package me.samsuik.sakura.scheduler;
 +
 +import org.jspecify.annotations.NullMarked;
@@ -187,7 +187,6 @@ index 0000000000000000000000000000000000000000..617a4bf9479364f2e234c7c73ba77806
 +@NullMarked
 +public final class ScheduleSakuraTasks {
 +    public static void schedule(final LevelTickScheduler scheduler) {
-+
 +    }
 +}
 diff --git a/me/samsuik/sakura/scheduler/SchedulerCallback.java b/me/samsuik/sakura/scheduler/SchedulerCallback.java
@@ -363,7 +362,7 @@ index 0000000000000000000000000000000000000000..27c6be86d09efc8d1ebc888d3a331b1b
 +}
 diff --git a/me/samsuik/sakura/tracking/block_change/BlockStateChangeTracker.java b/me/samsuik/sakura/tracking/block_change/BlockStateChangeTracker.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..92dbe78fb569df4318b4458259b84bbbbc410a47
+index 0000000000000000000000000000000000000000..d97c73c95b7e4a61bd4b10453453f4561172110e
 --- /dev/null
 +++ b/me/samsuik/sakura/tracking/block_change/BlockStateChangeTracker.java
 @@ -0,0 +1,102 @@
@@ -417,7 +416,7 @@ index 0000000000000000000000000000000000000000..92dbe78fb569df4318b4458259b84bbb
 +        final ListeningToPositions listener = new ListeningToPositions(immutablePositions, identifier, filter, callback);
 +
 +        for (final BlockPos pos : immutablePositions) {
-+            final long chunkKey = ChunkPos.asLong(pos);
++            final long chunkKey = ChunkPos.pack(pos);
 +            final LongOpenHashSet chunkIdentifiers = this.chunkAssociatedIdentifiers.computeIfAbsent(chunkKey, k -> new LongOpenHashSet());
 +
 +            if (!chunkIdentifiers.add(identifier)) {
@@ -441,7 +440,7 @@ index 0000000000000000000000000000000000000000..92dbe78fb569df4318b4458259b84bbb
 +        }
 +
 +        for (final BlockPos pos : listener.positions()) {
-+            final long chunkKey = ChunkPos.asLong(pos);
++            final long chunkKey = ChunkPos.pack(pos);
 +            final LongOpenHashSet chunkIdentifiers = this.chunkAssociatedIdentifiers.get(chunkKey);
 +
 +            if (chunkIdentifiers == null || !chunkIdentifiers.remove(identifier)) {
@@ -748,31 +747,31 @@ index 0000000000000000000000000000000000000000..a5fa2dd230319dca30ba0e23b725d8ec
 +    }
 +}
 diff --git a/net/minecraft/server/MinecraftServer.java b/net/minecraft/server/MinecraftServer.java
-index 83ef82a2094222b9f4ab0c60d242ac20b6a817ed..3d96af789e5185ab6f14af304f2183fa473baac5 100644
+index e7b81f3aaea4374a46a6b99dfc78f51d9c30f8d6..fd17cd1e10702d31079fccdbcc9c76fa39ed11bf 100644
 --- a/net/minecraft/server/MinecraftServer.java
 +++ b/net/minecraft/server/MinecraftServer.java
-@@ -1885,6 +1885,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
-             profilerFiller.pop();
-             profilerFiller.pop();
-             serverLevel.explosionDensityCache.clear(); // Paper - Optimize explosions
-+            serverLevel.levelTickScheduler.tick(serverLevel); // Sakura - implement state watchers and tick scheduler
+@@ -1926,6 +1926,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
+             profiler.pop();
+             profiler.pop();
+             level.explosionDensityCache.clear(); // Paper - Optimize explosions
++            level.levelTickScheduler.tick(level); // Sakura - implement state watchers and tick scheduler
          }
          this.isIteratingOverLevels = false; // Paper - Throw exception on world create while being ticked
  
 diff --git a/net/minecraft/server/level/ServerLevel.java b/net/minecraft/server/level/ServerLevel.java
-index 24ab6baa2dae923bffc7c121e16f0f4ff2bdda51..254a0ecdf1ca0f1dba7537f103cd287ef5c6169a 100644
+index 0fe31a6ee29e374e592eb024eaa55b51f39aba2e..e731c5a9deeb057c5907d59001739c4330c4e4a6 100644
 --- a/net/minecraft/server/level/ServerLevel.java
 +++ b/net/minecraft/server/level/ServerLevel.java
-@@ -730,6 +730,7 @@ public class ServerLevel extends Level implements ServerEntityGetter, WorldGenLe
+@@ -759,6 +759,7 @@ public class ServerLevel extends Level implements WorldGenLevel, ServerEntityGet
          // Paper end - rewrite chunk system
          this.getCraftServer().addWorld(this.getWorld()); // CraftBukkit
-         this.preciseTime = this.serverLevelData.getDayTime(); // Purpur - Configurable daylight cycle
+         this.preciseTime = this.serverLevelData.getGameTime(); // Purpur - Configurable daylight cycle
 +        me.samsuik.sakura.scheduler.ScheduleSakuraTasks.schedule(this.levelTickScheduler); // Sakura - implement state watchers and tick scheduler
      }
  
      // Paper start
 diff --git a/net/minecraft/world/CompoundContainer.java b/net/minecraft/world/CompoundContainer.java
-index 8eb989a811924fb6d2bc5150d7279d9d59bc3400..e3098cda3ea224a1f408174d45c8a62abba2fc36 100644
+index 42bf1a147b55a01dbbbd3d3ab94cdcfa873600a6..d070cd82cd0331e08e4ea8bf53e948121525e3a5 100644
 --- a/net/minecraft/world/CompoundContainer.java
 +++ b/net/minecraft/world/CompoundContainer.java
 @@ -54,6 +54,24 @@ public class CompoundContainer implements Container {
@@ -798,18 +797,18 @@ index 8eb989a811924fb6d2bc5150d7279d9d59bc3400..e3098cda3ea224a1f408174d45c8a62a
 +    }
 +    // Sakura end - implement state watchers and tick scheduler
  
-     public CompoundContainer(Container container1, Container container2) {
+     public CompoundContainer(final Container container1, final Container container2) {
          this.container1 = container1;
 diff --git a/net/minecraft/world/Container.java b/net/minecraft/world/Container.java
-index 6489b47810b0431c350098d574469bbe0adcd726..8f93246e99300f591e7174375aa634c8b5228058 100644
+index 52cb72d45dcd2606f6406b3525b30983b03d1104..a6f1e7e22b6bc9f810c45190e04626fc896f82b0 100644
 --- a/net/minecraft/world/Container.java
 +++ b/net/minecraft/world/Container.java
-@@ -16,7 +16,20 @@ import net.minecraft.world.level.Level;
+@@ -17,7 +17,20 @@ import net.minecraft.world.level.Level;
  import net.minecraft.world.level.block.entity.BlockEntity;
  import org.jspecify.annotations.Nullable;
  
--public interface Container extends Clearable, SlotProvider, Iterable<ItemStack> {
-+public interface Container extends Clearable, SlotProvider, Iterable<ItemStack>, me.samsuik.sakura.tracking.Watchable<Container> { // Sakura - implement state watchers and tick scheduler
+-public interface Container extends Clearable, Iterable<ItemStack>, SlotProvider {
++public interface Container extends Clearable, Iterable<ItemStack>, SlotProvider, me.samsuik.sakura.tracking.Watchable<Container> { // Sakura - implement state watchers and tick scheduler
 +
 +    // Sakura start - implement state watchers and tick scheduler
 +    @Override
@@ -827,7 +826,7 @@ index 6489b47810b0431c350098d574469bbe0adcd726..8f93246e99300f591e7174375aa634c8
  
      int getContainerSize();
 diff --git a/net/minecraft/world/entity/EntityEquipment.java b/net/minecraft/world/entity/EntityEquipment.java
-index 1e00a7bd89d885cabb4b9ca3c86fbd8cd93cebf5..3860f8eb7505fda076433add7e1576f798e66963 100644
+index 20041325ae77f16a5b77f5de7255788b52ebb3a5..3295903153a99f2d5e446b9b455aa63a3a955c5f 100644
 --- a/net/minecraft/world/entity/EntityEquipment.java
 +++ b/net/minecraft/world/entity/EntityEquipment.java
 @@ -7,7 +7,7 @@ import java.util.Objects;
@@ -836,9 +835,9 @@ index 1e00a7bd89d885cabb4b9ca3c86fbd8cd93cebf5..3860f8eb7505fda076433add7e1576f7
  
 -public class EntityEquipment {
 +public class EntityEquipment implements me.samsuik.sakura.tracking.Watchable<EntityEquipment> { // Sakura - implement state watchers and tick scheduler
-     public static final Codec<EntityEquipment> CODEC = Codec.unboundedMap(EquipmentSlot.CODEC, ItemStack.CODEC).xmap(map -> {
-         EnumMap<EquipmentSlot, ItemStack> map1 = new EnumMap<>(EquipmentSlot.class);
-         map1.putAll((Map<? extends EquipmentSlot, ? extends ItemStack>)map);
+     public static final Codec<EntityEquipment> CODEC = Codec.unboundedMap(EquipmentSlot.CODEC, ItemStack.CODEC).xmap(items -> {
+         EnumMap<EquipmentSlot, ItemStack> map = new EnumMap<>(EquipmentSlot.class);
+         map.putAll((Map<? extends EquipmentSlot, ? extends ItemStack>)items);
 @@ -19,6 +19,24 @@ public class EntityEquipment {
      });
      private final EnumMap<EquipmentSlot, ItemStack> items;
@@ -861,35 +860,40 @@ index 1e00a7bd89d885cabb4b9ca3c86fbd8cd93cebf5..3860f8eb7505fda076433add7e1576f7
 +    }
 +    // Sakura end - implement state watchers and tick scheduler
 +
-     private EntityEquipment(EnumMap<EquipmentSlot, ItemStack> items) {
+     private EntityEquipment(final EnumMap<EquipmentSlot, ItemStack> items) {
          this.items = items;
      }
-@@ -28,6 +46,7 @@ public class EntityEquipment {
+@@ -28,7 +46,11 @@ public class EntityEquipment {
      }
  
-     public ItemStack set(EquipmentSlot slot, ItemStack stack) {
-+        this.watchers.changed(this); // Sakura - implement state watchers and tick scheduler
-         return Objects.requireNonNullElse(this.items.put(slot, stack), ItemStack.EMPTY);
+     public ItemStack set(final EquipmentSlot slot, final ItemStack itemStack) {
+-        return Objects.requireNonNullElse(this.items.put(slot, itemStack), ItemStack.EMPTY);
++        // Sakura start - implement state watchers and tick scheduler
++        final ItemStack replacedItem = Objects.requireNonNullElse(this.items.put(slot, itemStack), ItemStack.EMPTY);
++        this.watchers.changed(this);
++        return replacedItem;
++        // Sakura end - implement state watchers and tick scheduler
      }
  
-@@ -55,6 +74,7 @@ public class EntityEquipment {
-     }
- 
-     public void setAll(EntityEquipment equipment) {
-+        this.watchers.changed(this); // Sakura - implement state watchers and tick scheduler
+     public ItemStack get(final EquipmentSlot slot) {
+@@ -57,6 +79,7 @@ public class EntityEquipment {
+     public void setAll(final EntityEquipment equipment) {
          this.items.clear();
          this.items.putAll(equipment.items);
++        this.watchers.changed(this); // Sakura - implement state watchers and tick scheduler
      }
-@@ -68,6 +88,7 @@ public class EntityEquipment {
-     }
+ 
+     public void dropAll(final LivingEntity dropper) {
+@@ -69,6 +92,7 @@ public class EntityEquipment {
  
      public void clear() {
+         this.items.replaceAll((s, v) -> ItemStack.EMPTY);
 +        this.watchers.changed(this); // Sakura - implement state watchers and tick scheduler
-         this.items.replaceAll((equipmentSlot, itemStack) -> ItemStack.EMPTY);
      }
  
+     // Paper start - EntityDeathEvent
 diff --git a/net/minecraft/world/entity/ai/attributes/AttributeInstance.java b/net/minecraft/world/entity/ai/attributes/AttributeInstance.java
-index e42e6d01a8bb1bca5dea440d3f002ead68590e11..dfd45399f16b2a848f46fe3668023cf71ee4f031 100644
+index 57cf93806c666d2605960d673e5bbee497da35ea..4a848660a1efa216cc59dc509cb87b82737f4813 100644
 --- a/net/minecraft/world/entity/ai/attributes/AttributeInstance.java
 +++ b/net/minecraft/world/entity/ai/attributes/AttributeInstance.java
 @@ -17,7 +17,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
@@ -919,7 +923,7 @@ index e42e6d01a8bb1bca5dea440d3f002ead68590e11..dfd45399f16b2a848f46fe3668023cf7
 +    }
 +    // Sakura end - implement state watchers and tick scheduler
 +
-     public AttributeInstance(Holder<Attribute> attribute, Consumer<AttributeInstance> onDirty) {
+     public AttributeInstance(final Holder<Attribute> attribute, final Consumer<AttributeInstance> onDirty) {
          this.attribute = attribute;
          this.onDirty = onDirty;
 @@ -111,6 +125,7 @@ public class AttributeInstance {
@@ -929,9 +933,9 @@ index e42e6d01a8bb1bca5dea440d3f002ead68590e11..dfd45399f16b2a848f46fe3668023cf7
 +        this.watchers.changed(this); // Sakura - implement state watchers and tick scheduler
      }
  
-     public void removeModifier(AttributeModifier modifier) {
+     public void removeModifier(final AttributeModifier modifier) {
 diff --git a/net/minecraft/world/entity/ai/attributes/AttributeMap.java b/net/minecraft/world/entity/ai/attributes/AttributeMap.java
-index fd26471047cc5bef28ee9ddba4a8542deef889cc..d176463efa0b2395d9b83d132bcc61b4a3df198e 100644
+index a3a1a5562e4940c96c688820c0fba4cf53fbcd48..2ba5046cd706ba6315ebb56c85ccce64c7fea371 100644
 --- a/net/minecraft/world/entity/ai/attributes/AttributeMap.java
 +++ b/net/minecraft/world/entity/ai/attributes/AttributeMap.java
 @@ -20,6 +20,12 @@ public class AttributeMap {
@@ -944,50 +948,50 @@ index fd26471047cc5bef28ee9ddba4a8542deef889cc..d176463efa0b2395d9b83d132bcc61b4
 +    }
 +    // Sakura end - implement state watchers and tick scheduler
 +
-     public AttributeMap(AttributeSupplier supplier) {
+     public AttributeMap(final AttributeSupplier supplier) {
          // Purpur start - Ridables
          this(supplier, null);
 diff --git a/net/minecraft/world/entity/player/Inventory.java b/net/minecraft/world/entity/player/Inventory.java
-index 41e59f3739945ca7f6ab710c993b5c0f15fcd529..3070e7835d50a69283a79d0652569f8b89ea14f2 100644
+index f004911c438e6f89d6e079437e3f4104d6cbacbd..6a59ae326e3c56503e64711daaf9ef6df4a0568a 100644
 --- a/net/minecraft/world/entity/player/Inventory.java
 +++ b/net/minecraft/world/entity/player/Inventory.java
 @@ -145,6 +145,7 @@ public class Inventory implements Container, Nameable {
-         if (!isHotbarSlot(slot)) {
+         if (!isHotbarSlot(selected)) {
              throw new IllegalArgumentException("Invalid selected slot");
          } else {
 +            this.equipment.changed(); // Sakura - implement state watchers and tick scheduler
-             this.selected = slot;
+             this.selected = selected;
          }
      }
 diff --git a/net/minecraft/world/entity/player/PlayerEquipment.java b/net/minecraft/world/entity/player/PlayerEquipment.java
-index 58ebbf73a85661735709d0559af3e19be23a782e..36ae938a1e7b767b3e27c60fc88a67158257accb 100644
+index e59787c1698e96df98ef4cf98d62b4a67c4e95dc..62ad0d316404fd80808a6cdcbf7413ed4d5f853d 100644
 --- a/net/minecraft/world/entity/player/PlayerEquipment.java
 +++ b/net/minecraft/world/entity/player/PlayerEquipment.java
 @@ -13,6 +13,7 @@ public class PlayerEquipment extends EntityEquipment {
  
      @Override
-     public ItemStack set(EquipmentSlot slot, ItemStack stack) {
+     public ItemStack set(final EquipmentSlot slot, final ItemStack itemStack) {
 +        this.changed(); // Sakura - implement state watchers and tick scheduler
-         return slot == EquipmentSlot.MAINHAND ? this.player.getInventory().setSelectedItem(stack) : super.set(slot, stack);
+         return slot == EquipmentSlot.MAINHAND ? this.player.getInventory().setSelectedItem(itemStack) : super.set(slot, itemStack);
      }
  
 diff --git a/net/minecraft/world/item/ItemStack.java b/net/minecraft/world/item/ItemStack.java
-index 4e5e83ad6cc869635246ece99d8098a813aca3c7..891c054b37f07ca7c9551bbb996b2ba25a6a3165 100644
+index 5e1bba46ae7268de451172543c35427e4a8f8e7b..cc76cbb9576fedefa391a7e350a41ef22b102c8a 100644
 --- a/net/minecraft/world/item/ItemStack.java
 +++ b/net/minecraft/world/item/ItemStack.java
-@@ -102,7 +102,7 @@ import org.apache.commons.lang3.mutable.MutableBoolean;
+@@ -100,7 +100,7 @@ import org.apache.commons.lang3.mutable.MutableBoolean;
  import org.jspecify.annotations.Nullable;
  import org.slf4j.Logger;
  
--public final class ItemStack implements DataComponentHolder {
-+public final class ItemStack implements DataComponentHolder, me.samsuik.sakura.tracking.Watchable<ItemStack> { // Sakura - implement state watchers and tick scheduler
+-public final class ItemStack implements DataComponentHolder, ItemInstance {
++public final class ItemStack implements DataComponentHolder, ItemInstance, me.samsuik.sakura.tracking.Watchable<ItemStack> { // Sakura - implement state watchers and tick scheduler
      private static final List<Component> OP_NBT_WARNING = List.of(
          Component.translatable("item.op_warning.line1").withStyle(ChatFormatting.RED, ChatFormatting.BOLD),
          Component.translatable("item.op_warning.line2").withStyle(ChatFormatting.RED),
-@@ -266,6 +266,20 @@ public final class ItemStack implements DataComponentHolder {
-         return !this.isEmpty() && this.components.hasNonDefault(component);
+@@ -259,6 +259,19 @@ public final class ItemStack implements DataComponentHolder, ItemInstance {
+         return stackCopy;
      }
- 
+     // Sakura end - modify components sent to the client
 +    // Sakura start - implement state watchers and tick scheduler
 +    private final me.samsuik.sakura.tracking.ChangeWatchers<ItemStack> watchers = new me.samsuik.sakura.tracking.ChangeWatchers<>();
 +
@@ -1001,11 +1005,10 @@ index 4e5e83ad6cc869635246ece99d8098a813aca3c7..891c054b37f07ca7c9551bbb996b2ba2
 +        this.watchers.remove(listener);
 +    }
 +    // Sakura end - implement state watchers and tick scheduler
-+
-     public ItemStack(ItemLike item) {
-         this(item, 1);
-     }
-@@ -1025,11 +1039,16 @@ public final class ItemStack implements DataComponentHolder {
+ 
+     public ItemStack(final ItemLike item, final int count) {
+         this(item.asItem().builtInRegistryHolder(), count);
+@@ -1019,11 +1032,16 @@ public final class ItemStack implements DataComponentHolder, ItemInstance {
      // CraftBukkit start
      public void restorePatch(DataComponentPatch datacomponentpatch) {
          this.components.restorePatch(datacomponentpatch);
@@ -1013,42 +1016,42 @@ index 4e5e83ad6cc869635246ece99d8098a813aca3c7..891c054b37f07ca7c9551bbb996b2ba2
      }
      // CraftBukkit end
  
-     public <T> @Nullable T set(DataComponentType<T> component, @Nullable T value) {
--        return this.components.set(component, value);
+     public <T> @Nullable T set(final DataComponentType<T> type, final @Nullable T value) {
+-        return this.components.set(type, value);
 +        // Sakura start - implement state watchers and tick scheduler
-+        final T type = this.components.set(component, value);
++        final T replacedValue = this.components.set(type, value);
 +        this.watchers.changed(this);
-+        return type;
++        return replacedValue;
 +        // Sakura end - implement state watchers and tick scheduler
      }
  
-     public <T> @Nullable T set(TypedDataComponent<T> component) {
-@@ -1050,7 +1069,11 @@ public final class ItemStack implements DataComponentHolder {
+     public <T> @Nullable T set(final TypedDataComponent<T> value) {
+@@ -1044,7 +1062,11 @@ public final class ItemStack implements DataComponentHolder, ItemInstance {
      }
  
-     public <T> @Nullable T remove(DataComponentType<? extends T> component) {
--        return this.components.remove(component);
+     public <T> @Nullable T remove(final DataComponentType<? extends T> type) {
+-        return this.components.remove(type);
 +        // Sakura start - implement state watchers and tick scheduler
-+        final T type = this.components.remove(component);
++        final T removedValue = this.components.remove(type);
 +        this.watchers.changed(this);
-+        return type;
++        return removedValue;
 +        // Sakura end - implement state watchers and tick scheduler
      }
  
-     public void applyComponentsAndValidate(DataComponentPatch components) {
-@@ -1384,6 +1407,7 @@ public final class ItemStack implements DataComponentHolder {
+     public void applyComponentsAndValidate(final DataComponentPatch patch) {
+@@ -1368,6 +1390,7 @@ public final class ItemStack implements DataComponentHolder, ItemInstance {
  
-     public void setCount(int count) {
+     public void setCount(final int count) {
          this.count = count;
 +        this.watchers.changed(this); // Sakura - implement state watchers and tick scheduler
      }
  
-     public void limitSize(int maxSize) {
+     public void limitSize(final int maxStackSize) {
 diff --git a/net/minecraft/world/level/Level.java b/net/minecraft/world/level/Level.java
-index 08d340eb76ba0f681d4f7f8dfc26276de6458bf9..e1cb018245cfc4f4a90eefe195e2ad7ad815f5c1 100644
+index cc381434c610272889b7df601560bf14e60923f1..24958ecab42cb3005f01678ac27a1e1ac8d0d864 100644
 --- a/net/minecraft/world/level/Level.java
 +++ b/net/minecraft/world/level/Level.java
-@@ -873,6 +873,15 @@ public abstract class Level implements LevelAccessor, AutoCloseable, ca.spottedl
+@@ -878,6 +878,15 @@ public abstract class Level implements LevelAccessor, AutoCloseable, ca.spottedl
          return chunk != null ? chunk.getNoiseBiome(x, y, z) : this.getUncachedNoiseBiome(x, y, z);
      }
      // Paper end - optimise random ticking
@@ -1063,20 +1066,20 @@ index 08d340eb76ba0f681d4f7f8dfc26276de6458bf9..e1cb018245cfc4f4a90eefe195e2ad7a
 +    // Sakura end - implement state watchers and tick scheduler
  
      protected Level(
-         WritableLevelData levelData,
-@@ -1124,6 +1133,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable, ca.spottedl
+         final WritableLevelData levelData,
+@@ -1131,6 +1140,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable, ca.spottedl
          } else if (!this.isClientSide() && this.isDebug()) {
              return false;
          } else {
 +            this.blockStateRevisionCounter.incrementAndGet(); // Sakura - implement state watchers and tick scheduler
-             LevelChunk chunkAt = this.getChunkAt(pos);
-             Block block = state.getBlock();
+             LevelChunk chunk = this.getChunkAt(pos);
+             Block block = blockState.getBlock();
              // CraftBukkit start - capture blockstates
 diff --git a/net/minecraft/world/level/block/ChestBlock.java b/net/minecraft/world/level/block/ChestBlock.java
-index 6cd7150c23572b1ad627cabe406ebd9015a89c31..ab355b14dad5b69649d46f5fa58606787977edcb 100644
+index 975872c07c1efb97cb2d134078bd5a6eba77b404..7377161d7e8ec0f0d2af56f255a7c1d56d477a19 100644
 --- a/net/minecraft/world/level/block/ChestBlock.java
 +++ b/net/minecraft/world/level/block/ChestBlock.java
-@@ -167,6 +167,15 @@ public class ChestBlock extends AbstractChestBlock<ChestBlockEntity> implements
+@@ -144,6 +144,15 @@ public class ChestBlock extends AbstractChestBlock<ChestBlockEntity> implements
          return CODEC;
      }
  
@@ -1090,22 +1093,22 @@ index 6cd7150c23572b1ad627cabe406ebd9015a89c31..ab355b14dad5b69649d46f5fa5860678
 +    // Sakura end - implement state watchers and tick scheduler
 +
      protected ChestBlock(
-         Supplier<BlockEntityType<? extends ChestBlockEntity>> blockEntityType,
-         SoundEvent openSound,
-@@ -209,9 +218,11 @@ public class ChestBlock extends AbstractChestBlock<ChestBlockEntity> implements
-                 && chestType != ChestType.SINGLE
-                 && state.getValue(FACING) == neighborState.getValue(FACING)
-                 && getConnectedDirection(neighborState) == direction.getOpposite()) {
+         final Supplier<BlockEntityType<? extends ChestBlockEntity>> blockEntityType,
+         final SoundEvent openSound,
+@@ -186,9 +195,11 @@ public class ChestBlock extends AbstractChestBlock<ChestBlockEntity> implements
+                 && neighbourType != ChestType.SINGLE
+                 && state.getValue(FACING) == neighbourState.getValue(FACING)
+                 && getConnectedDirection(neighbourState) == directionToNeighbour.getOpposite()) {
 +                this.changedBlockState(level, pos); // Sakura - implement state watchers and tick scheduler
-                 return state.setValue(TYPE, chestType.getOpposite());
+                 return state.setValue(TYPE, neighbourType.getOpposite());
              }
-         } else if (getConnectedDirection(state) == direction) {
+         } else if (getConnectedDirection(state) == directionToNeighbour) {
 +            this.changedBlockState(level, pos); // Sakura - implement state watchers and tick scheduler
              return state.setValue(TYPE, ChestType.SINGLE);
          }
  
 diff --git a/net/minecraft/world/level/block/entity/BaseContainerBlockEntity.java b/net/minecraft/world/level/block/entity/BaseContainerBlockEntity.java
-index edf3bc4adc9b1700b73f06ea940f17cd55b16860..b9c8ae453100414b93fc858a08faed5d69b76492 100644
+index de47d6143f72a27721cfcb25443cd9d8821c0ebb..7ba524aa31a43489345e4848683a6f1662a42ea7 100644
 --- a/net/minecraft/world/level/block/entity/BaseContainerBlockEntity.java
 +++ b/net/minecraft/world/level/block/entity/BaseContainerBlockEntity.java
 @@ -30,6 +30,42 @@ public abstract class BaseContainerBlockEntity extends BlockEntity implements Co
@@ -1148,14 +1151,14 @@ index edf3bc4adc9b1700b73f06ea940f17cd55b16860..b9c8ae453100414b93fc858a08faed5d
 +    }
 +    // Sakura end - implement state watchers and tick scheduler
 +
-     protected BaseContainerBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState blockState) {
-         super(type, pos, blockState);
+     protected BaseContainerBlockEntity(final BlockEntityType<?> type, final BlockPos worldPosition, final BlockState blockState) {
+         super(type, worldPosition, blockState);
      }
 diff --git a/net/minecraft/world/level/chunk/LevelChunk.java b/net/minecraft/world/level/chunk/LevelChunk.java
-index 3acc1374a7ef968d88e9f566ce7b812fb8d580af..a1543dbfc130542108ca6e50248730303f35501e 100644
+index a4b794781e66e6a054fb437bd0b66712b13320a4..21710c5acb1a5f12c303954b5d1249462cf5366d 100644
 --- a/net/minecraft/world/level/chunk/LevelChunk.java
 +++ b/net/minecraft/world/level/chunk/LevelChunk.java
-@@ -135,6 +135,13 @@ public class LevelChunk extends ChunkAccess implements DebugValueSource, ca.spot
+@@ -136,6 +136,13 @@ public class LevelChunk extends ChunkAccess implements DebugValueSource, ca.spot
          return this.getBlockStateFinal(x, y, z);
      }
      // Paper end - get block chunk optimisation
@@ -1167,21 +1170,21 @@ index 3acc1374a7ef968d88e9f566ce7b812fb8d580af..a1543dbfc130542108ca6e5024873030
 +    }
 +    // Sakura end - implement state watchers and tick scheduler
  
-     public LevelChunk(Level level, ChunkPos pos) {
+     public LevelChunk(final Level level, final ChunkPos pos) {
          this(level, pos, UpgradeData.EMPTY, new LevelChunkTicks<>(), new LevelChunkTicks<>(), 0L, null, null, null);
-@@ -172,6 +179,7 @@ public class LevelChunk extends ChunkAccess implements DebugValueSource, ca.spot
+@@ -173,6 +180,7 @@ public class LevelChunk extends ChunkAccess implements DebugValueSource, ca.spot
          this.debug = !empty && this.level.isDebug();
          this.defaultBlockState = empty ? VOID_AIR_BLOCKSTATE : AIR_BLOCKSTATE;
          // Paper end - get block chunk optimisation
 +        this.blockStateWatcher.load(this); // Sakura - implement state watchers and tick scheduler
      }
  
-     public LevelChunk(ServerLevel level, ProtoChunk chunk, LevelChunk.@Nullable PostLoadProcessor postLoad) {
-@@ -421,6 +429,7 @@ public class LevelChunk extends ChunkAccess implements DebugValueSource, ca.spot
-                 if (!section.getBlockState(i, i1, i2).is(block)) {
+     public LevelChunk(final ServerLevel level, final ProtoChunk protoChunk, final LevelChunk.@Nullable PostLoadProcessor postLoad) {
+@@ -422,6 +430,7 @@ public class LevelChunk extends ChunkAccess implements DebugValueSource, ca.spot
+                 if (!section.getBlockState(localX, localY, localZ).is(newBlock)) {
                      return null;
                  } else {
-+                    this.blockStateWatcher.blockChange(this.level, pos, state, blockState); // Sakura - implement state watchers and tick scheduler
-                     if (!this.level.isClientSide() && (flags & Block.UPDATE_SKIP_ON_PLACE) == 0 && (!this.level.captureBlockStates || block instanceof net.minecraft.world.level.block.BaseEntityBlock)) { // CraftBukkit - Don't place while processing the BlockPlaceEvent, unless it's a BlockContainer. Prevents blocks such as TNT from activating when cancelled.
-                         state.onPlace(this.level, pos, blockState, flag1);
++                    this.blockStateWatcher.blockChange(this.level, pos, state, oldState); // Sakura - implement state watchers and tick scheduler
+                     if (!this.level.isClientSide() && (flags & Block.UPDATE_SKIP_ON_PLACE) == 0 && (!this.level.captureBlockStates || newBlock instanceof net.minecraft.world.level.block.BaseEntityBlock)) { // CraftBukkit - Don't place while processing the BlockPlaceEvent, unless it's a BlockContainer. Prevents blocks such as TNT from activating when cancelled.
+                         state.onPlace(this.level, pos, oldState, movedByPiston);
                      }

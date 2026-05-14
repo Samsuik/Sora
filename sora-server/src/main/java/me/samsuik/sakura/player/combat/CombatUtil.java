@@ -17,7 +17,8 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.item.*;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
@@ -91,7 +92,7 @@ public final class CombatUtil {
             enchantment.value().modifyDamage(level, enchantmentLevel, itemstack, entity, damageSource, damage);
         }
         // legacy - modern
-        return enchantmentLevel * 1.25F - damage.getValue();
+        return enchantmentLevel * 1.25F - damage.floatValue();
     }
 
     private static Holder<Enchantment> getEnchantmentHolder(final ResourceKey<Enchantment> enchantmentKey) {

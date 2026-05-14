@@ -1,0 +1,65 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Samsuik <kfian294ma4@gmail.com>
+Date: Thu, 14 May 2026 21:44:01 +0100
+Subject: [PATCH] Configure server snapshot mechanics
+
+
+diff --git a/me/samsuik/sakura/mechanics/EntityBehaviour.java b/me/samsuik/sakura/mechanics/EntityBehaviour.java
+index 43a9bae3d5114e7f702cd9ce17c1653a2a672076..0a36b5f5ea5772ac4d66ea5c38649f48bd9c3321 100644
+--- a/me/samsuik/sakura/mechanics/EntityBehaviour.java
++++ b/me/samsuik/sakura/mechanics/EntityBehaviour.java
+@@ -15,6 +15,15 @@ import java.util.List;
+ 
+ @NullMarked
+ public final class EntityBehaviour {
++    public static boolean useFloatForAirDrag(final MinecraftMechanicsTarget mechanicsTarget) {
++        return mechanicsTarget.isSnapshot() && mechanicsTarget.atLeast(MechanicVersion.v26_2_s6)
++            || mechanicsTarget.before(MechanicVersion.v1_14);
++    }
++
++    public static boolean canBounceOnSlime(final MinecraftMechanicsTarget mechanicsTarget) {
++        return !mechanicsTarget.isSnapshot() || mechanicsTarget.before(MechanicVersion.v26_2_s1);
++    }
++
+     public static void changeEntityPosition(
+         final Entity entity,
+         final Vec3 position,
+diff --git a/net/minecraft/world/entity/item/FallingBlockEntity.java b/net/minecraft/world/entity/item/FallingBlockEntity.java
+index 861a74cbdf95243e1fd1fbda04195c53b4e30965..9acbc05b1b3f9b88f7ad03796dc508051b8b6295 100644
+--- a/net/minecraft/world/entity/item/FallingBlockEntity.java
++++ b/net/minecraft/world/entity/item/FallingBlockEntity.java
+@@ -400,7 +400,7 @@ public class FallingBlockEntity extends Entity implements me.samsuik.sakura.enti
+ 
+             // Sakura start - configure server mechanics
+             if (mechanicsTarget.atLeast(me.samsuik.sakura.mechanics.MechanicVersion.v1_12)) {
+-                final double drag = mechanicsTarget.before(me.samsuik.sakura.mechanics.MechanicVersion.v1_14)
++                final double drag = me.samsuik.sakura.mechanics.EntityBehaviour.useFloatForAirDrag(mechanicsTarget)
+                     ? 0.98f
+                     : 0.98;
+                 this.setDeltaMovement(this.getDeltaMovement().scale(drag));
+diff --git a/net/minecraft/world/entity/item/PrimedTnt.java b/net/minecraft/world/entity/item/PrimedTnt.java
+index a21b0c31b984e7e8fe2943001d42a7bf4727e8ef..9f017cba3b18238ed938f057b083f76038fa0353 100644
+--- a/net/minecraft/world/entity/item/PrimedTnt.java
++++ b/net/minecraft/world/entity/item/PrimedTnt.java
+@@ -185,7 +185,7 @@ public class PrimedTnt extends Entity implements TraceableEntity, me.samsuik.sak
+         // Paper end - Configurable TNT height nerf
+         // Sakura start - configure server mechanics
+         final me.samsuik.sakura.mechanics.MinecraftMechanicsTarget mechanicsTarget = this.mechanicsTarget();
+-        final double drag = mechanicsTarget.before(me.samsuik.sakura.mechanics.MechanicVersion.v1_14)
++        final double drag = me.samsuik.sakura.mechanics.EntityBehaviour.useFloatForAirDrag(mechanicsTarget)
+             ? 0.98f
+             : 0.98;
+         this.setDeltaMovement(this.getDeltaMovement().scale(drag));
+diff --git a/net/minecraft/world/level/block/SlimeBlock.java b/net/minecraft/world/level/block/SlimeBlock.java
+index 44cfb50da850bdd8eba88b934313707cf6c3598f..360147f4f7080ccd7a4018d0600fbe86936b61f2 100644
+--- a/net/minecraft/world/level/block/SlimeBlock.java
++++ b/net/minecraft/world/level/block/SlimeBlock.java
+@@ -31,7 +31,7 @@ public class SlimeBlock extends HalfTransparentBlock {
+ 
+     @Override
+     public void updateEntityMovementAfterFallOn(final BlockGetter level, final Entity entity) {
+-        if (entity.isSuppressingBounce()) {
++        if (entity.isSuppressingBounce() || !me.samsuik.sakura.mechanics.EntityBehaviour.canBounceOnSlime(entity.mechanicsTarget())) { // Sakura - configure server mechanics
+             super.updateEntityMovementAfterFallOn(level, entity);
+         } else {
+             this.bounceUp(entity);

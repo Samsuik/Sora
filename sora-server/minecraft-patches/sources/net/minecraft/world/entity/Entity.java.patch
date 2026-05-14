@@ -1,14 +1,15 @@
 --- a/net/minecraft/world/entity/Entity.java
 +++ b/net/minecraft/world/entity/Entity.java
-@@ -537,6 +_,7 @@
+@@ -551,6 +_,8 @@
          }
      }
      // Paper end - optimise entity tracker
 +    public boolean pushedByFluid = true; // Sakura - entity pushed by fluid api
++    public boolean cannonEntity = false; // Sakura - add cannon entity field
  
      // Purpur start - Add canSaveToDisk to Entity
      public boolean canSaveToDisk() {
-@@ -1279,8 +_,12 @@
+@@ -1295,8 +_,12 @@
                      }
                  }
  
@@ -20,10 +21,10 @@
 +                    this.setDeltaMovement(this.getDeltaMovement().multiply(blockSpeedFactor, 1.0, blockSpeedFactor));
 +                }
 +                // Sakura end - only apply block speed factor while moving
-                 profilerFiller.pop();
+                 profiler.pop();
              }
          }
-@@ -4353,7 +_,7 @@
+@@ -4366,7 +_,7 @@
      }
  
      public boolean isPushedByFluid() {

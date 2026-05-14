@@ -15,7 +15,7 @@
 +    }
 +    // Sakura start - configure default mob spawner properties
 +
-     public void setEntityId(EntityType<?> type, @Nullable Level level, RandomSource random, BlockPos pos) {
+     public void setEntityId(final EntityType<?> type, final @Nullable Level level, final RandomSource random, final BlockPos pos) {
          this.getOrCreateNextSpawnData(level, random, pos).getEntityToSpawn().putString("id", BuiltInRegistries.ENTITY_TYPE.getKey(type).toString());
          this.spawnPotentials = WeightedList.of(); // CraftBukkit - SPIGOT-3496, MC-92282
 @@ -90,7 +_,7 @@
@@ -23,16 +23,16 @@
          if (tickDelay == -1) { return; } // If disabled
          // Paper end - Configurable mob spawner tick rate
 -        if (this.isNearPlayer(level, pos) && level.isSpawnerBlockEnabled()) {
-+        if (!level.sakuraConfig().environment.mobSpawner.requireNearbyPlayer || this.isNearPlayer(level, pos)) { // Sakura - configure mob spawner behaviour
++        if ((!level.sakuraConfig().environment.mobSpawner.requireNearbyPlayer || this.isNearPlayer(level, pos)) && level.isSpawnerBlockEnabled()) { // Sakura - configure mob spawner behaviour
              if (this.spawnDelay < -tickDelay) { // Paper - Configurable mob spawner tick rate
                  this.delay(level, pos);
              }
 @@ -130,7 +_,7 @@
-                                 if (!customSpawnRules.isValidPosition(blockPos, level)) {
+                                 if (!customSpawnRules.isValidPosition(spawnBlockPos, level)) {
                                      continue;
                                  }
--                            } else if (!SpawnPlacements.checkSpawnRules(optional.get(), level, EntitySpawnReason.SPAWNER, blockPos, level.getRandom())) {
-+                            } else if (level.sakuraConfig().environment.mobSpawner.checkSpawnConditions && !SpawnPlacements.checkSpawnRules(optional.get(), level, EntitySpawnReason.SPAWNER, pos, level.getRandom())) { // Sakura - configure mob spawner behaviour
+-                            } else if (!SpawnPlacements.checkSpawnRules(entityType.get(), level, EntitySpawnReason.SPAWNER, spawnBlockPos, level.getRandom())) {
++                            } else if (level.sakuraConfig().environment.mobSpawner.checkSpawnConditions && !SpawnPlacements.checkSpawnRules(entityType.get(), level, EntitySpawnReason.SPAWNER, spawnBlockPos, level.getRandom())) { // Sakura - configure mob spawner behaviour
                                  continue;
                              }
  
@@ -40,18 +40,18 @@
                                  return;
                              }
  
--                            int size = level.getEntities(
+-                            int nearBy = level.getEntities(
 -                                    EntityTypeTest.forExactClass(entity.getClass()),
 -                                    new AABB(pos.getX(), pos.getY(), pos.getZ(), pos.getX() + 1, pos.getY() + 1, pos.getZ() + 1).inflate(this.spawnRange),
 -                                    EntitySelector.NO_SPECTATORS
 -                                )
 -                                .size();
 +                            // Sakura start - configure mob spawner behaviour
-+                            final int size;
++                            final int nearBy;
 +                            if (level.sakuraConfig().environment.mobSpawner.ignoreEntityLimit) {
-+                                size = 0;
++                                nearBy = 0;
 +                            } else {
-+                                size = level.getEntities(
++                                nearBy = level.getEntities(
 +                                        EntityTypeTest.forExactClass(entity.getClass()),
 +                                        new AABB(pos.getX(), pos.getY(), pos.getZ(), pos.getX() + 1, pos.getY() + 1, pos.getZ() + 1).inflate(this.spawnRange),
 +                                        EntitySelector.NO_SPECTATORS
@@ -59,20 +59,16 @@
 +                                    .size();
 +                            }
 +                            // Sakura end - configure mob spawner behaviour
-                             if (size >= this.maxNearbyEntities) {
+                             if (nearBy >= this.maxNearbyEntities) {
                                  this.delay(level, pos);
                                  return;
-@@ -171,8 +_,11 @@
+@@ -171,8 +_,7 @@
  
                              entity.snapTo(entity.getX(), entity.getY(), entity.getZ(), random.nextFloat() * 360.0F, 0.0F);
                              if (entity instanceof Mob mob) {
 -                                if (nextSpawnData.getCustomSpawnRules().isEmpty() && !mob.checkSpawnRules(level, EntitySpawnReason.SPAWNER)
 -                                    || !mob.checkSpawnObstruction(level)) {
-+                                // Sakura start - configure mob spawner behaviour
-+                                if (level.sakuraConfig().environment.mobSpawner.checkSpawnConditions &&
-+                                    (nextSpawnData.getCustomSpawnRules().isEmpty() && !mob.checkSpawnRules(level, EntitySpawnReason.SPAWNER)
-+                                        || !mob.checkSpawnObstruction(level))) {
-+                                    // Sakura end - configure mob spawner behaviour
++                                if (level.sakuraConfig().environment.mobSpawner.checkSpawnConditions && (nextSpawnData.getCustomSpawnRules().isEmpty() && !mob.checkSpawnRules(level, EntitySpawnReason.SPAWNER) || !mob.checkSpawnObstruction(level))) { // Sakura - configure mob spawner behaviour
                                      continue;
                                  }
  

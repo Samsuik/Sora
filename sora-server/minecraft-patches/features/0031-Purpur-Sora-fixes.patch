@@ -1,0 +1,45 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Samsuik <kfian294ma4@gmail.com>
+Date: Fri, 10 Apr 2026 18:54:39 +0100
+Subject: [PATCH] Purpur Sora fixes
+
+
+diff --git a/net/minecraft/world/entity/monster/Creeper.java b/net/minecraft/world/entity/monster/Creeper.java
+index 2615c3381f812bd64f1961698f7793a4077be5ce..6a16dacddb6a5b3f0a2c26bb1084a6c89a1aba33 100644
+--- a/net/minecraft/world/entity/monster/Creeper.java
++++ b/net/minecraft/world/entity/monster/Creeper.java
+@@ -378,7 +378,7 @@ public class Creeper extends Monster {
+             // This can be abused to blow up watered blocks.
+             // This is fixed by adding a slight offset to the explosion position.
+             final double explosionY = this.getY() + 1.0e-5;
+-            level.explode(this, this.getX(), explosionY, this.getZ(), event.getRadius(), event.getFire(), Level.ExplosionInteraction.MOB); // CraftBukkit // Paper - fix DamageSource API (revert to vanilla, no, just no, don't change this)
++            level.explode(this, this.getX(), explosionY, this.getZ(), event.getRadius(), event.getFire(), level.getGameRules().get(net.minecraft.world.level.gamerules.GameRules.MOB_GRIEFING) && level().purpurConfig.creeperAllowGriefing ? Level.ExplosionInteraction.MOB : Level.ExplosionInteraction.NONE); // CraftBukkit // Paper - fix DamageSource API (revert to vanilla, no, just no, don't change this) // Purpur - Add enderman and creeper griefing controls
+             // Sakura end - fix creepers blowing up watered blocks
+             this.spawnLingeringCloud();
+             this.triggerOnDeathMobEffects(level, Entity.RemovalReason.KILLED);
+diff --git a/net/minecraft/world/item/BucketItem.java b/net/minecraft/world/item/BucketItem.java
+index fb4cc764790048d6485df4bd96cadffaca111b3d..68f57a43e8111c2374041cd2e339b272f1cfa228 100644
+--- a/net/minecraft/world/item/BucketItem.java
++++ b/net/minecraft/world/item/BucketItem.java
+@@ -151,7 +151,7 @@ public class BucketItem extends Item implements DispensibleContainerItem {
+             // CraftBukkit end
+             if (!canPlaceFluidInsideBlock) {
+                 return hitResult != null && this.emptyContents(user, level, hitResult.getBlockPos().relative(hitResult.getDirection()), null, direction, clicked, itemStack, hand); // CraftBukkit
+-            } else if (!level.sakuraConfig().environment.allowWaterInTheNether && level.environmentAttributes().getValue(EnvironmentAttributes.WATER_EVAPORATES, pos) && this.content.is(FluidTags.WATER)) { // Sakura - allow water in the nether
++            } else if ((!level.sakuraConfig().environment.allowWaterInTheNether && level.environmentAttributes().getValue(EnvironmentAttributes.WATER_EVAPORATES, pos) || (level.isTheEnd() && !org.purpurmc.purpur.PurpurConfig.allowWaterPlacementInTheEnd)) && this.content == Fluids.WATER) { // Sakura - allow water in the nether // Purpur - Add allow water in end world option
+                 int x = pos.getX();
+                 int y = pos.getY();
+                 int z = pos.getZ();
+diff --git a/net/minecraft/world/level/block/IceBlock.java b/net/minecraft/world/level/block/IceBlock.java
+index 152ceb75b3ecca0915be6d2ce85f177bec4c2b6c..3a0886ef8cd27630e8e7ba6bf1b17ae897aed5f8 100644
+--- a/net/minecraft/world/level/block/IceBlock.java
++++ b/net/minecraft/world/level/block/IceBlock.java
+@@ -49,7 +49,7 @@ public class IceBlock extends HalfTransparentBlock {
+     public void afterDestroy(Level level, BlockPos pos, ItemStack destroyedWith) {
+         // Paper end - Improve Block#breakNaturally API
+         if (!EnchantmentHelper.hasTag(destroyedWith, EnchantmentTags.PREVENTS_ICE_MELTING)) {
+-            if (!level.sakuraConfig().environment.allowWaterInTheNether && level.environmentAttributes().getValue(EnvironmentAttributes.WATER_EVAPORATES, pos)) { // Sakura - allow water in the nether
++            if (!level.sakuraConfig().environment.allowWaterInTheNether && level.isNether() || (level.isTheEnd() && !org.purpurmc.purpur.PurpurConfig.allowWaterPlacementInTheEnd)) { // Sakura - allow water in the nether // Purpur - Add allow water in end world option
+                 level.removeBlock(pos, false);
+                 return;
+             }

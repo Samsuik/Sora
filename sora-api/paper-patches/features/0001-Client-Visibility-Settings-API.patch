@@ -5,10 +5,10 @@ Subject: [PATCH] Client Visibility Settings API
 
 
 diff --git a/src/main/java/org/bukkit/entity/Player.java b/src/main/java/org/bukkit/entity/Player.java
-index bbc94a7f94882262d9c8da1237777aa2a200fd3d..3a6801e915877516a5919d95a926db0c1e9cc7d8 100644
+index 7008fc3cbf465df16b18becab58befe79932250b..94a3bc2cd210972f5fc182b35e7d971da42f9742 100644
 --- a/src/main/java/org/bukkit/entity/Player.java
 +++ b/src/main/java/org/bukkit/entity/Player.java
-@@ -73,6 +73,14 @@ public interface Player extends HumanEntity, Conversable, OfflinePlayer, PluginM
+@@ -76,6 +76,14 @@ public interface Player extends HumanEntity, Conversable, OfflinePlayer, PluginM
  
      void setTrackingRangeModifier(final double modifier);
      // Sakura end - entity tracking range modifier

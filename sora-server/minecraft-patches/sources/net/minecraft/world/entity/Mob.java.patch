@@ -13,8 +13,8 @@
 +    }
 +
 +    @Override
-+    protected boolean updateInWaterStateAndDoFluidPushing() {
-+        return this.isAwareOnGroundOrSwimming() && super.updateInWaterStateAndDoFluidPushing();
++    protected boolean updateFluidInteraction() {
++        return this.isAwareOnGroundOrSwimming() && super.updateFluidInteraction();
 +    }
 +
 +    @Override
@@ -23,26 +23,18 @@
 +    }
 +    // Sakura end - simplify nerfed mob logic
 +
-     protected Mob(EntityType<? extends Mob> type, Level level) {
+     protected Mob(final EntityType<? extends Mob> type, final Level level) {
          super(type, level);
          this.goalSelector = new GoalSelector();
 @@ -165,6 +_,11 @@
          if (level instanceof ServerLevel) {
              this.registerGoals();
          }
-+        // Sakura start - add disable mob ai
++        // Sakura start - configure mob ai
 +        if (this.level().sakuraConfig().entity.disableMobAi) {
 +            this.aware = false;
 +        }
-+        // Sakura end - end disable mob ai
++        // Sakura end - configure mob ai
      }
  
-     // CraftBukkit start
-@@ -222,6 +_,7 @@
-     @Override
-     public void inactiveTick() {
-         super.inactiveTick();
-+        if (!this.aware) return; // Sakura - fix nerfed mobs ticking goals while inactive
-         if (this.goalSelector.inactiveTick()) {
-             this.goalSelector.tick();
-         }
+     protected void registerGoals() {

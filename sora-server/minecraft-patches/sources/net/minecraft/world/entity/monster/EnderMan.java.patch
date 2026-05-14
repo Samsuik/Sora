@@ -6,12 +6,12 @@
      private @Nullable EntityReference<LivingEntity> persistentAngerTarget;
 +    private long lastTeleportAttemptTime; // Sakura - fix endermen teleporting causing lag
  
-     public EnderMan(EntityType<? extends EnderMan> type, Level level) {
+     public EnderMan(final EntityType<? extends EnderMan> type, final Level level) {
          super(type, level);
-@@ -332,6 +_,14 @@
+@@ -330,6 +_,14 @@
      }
  
-     private boolean teleport(double x, double y, double z) {
+     private boolean teleport(final double x, final double y, final double z) {
 +        // Sakura start - fix endermen teleporting causing lag
 +        if (this.tickCount == this.lastTeleportAttemptTime) {
 +            return false;
@@ -20,6 +20,6 @@
 +        this.lastTeleportAttemptTime = this.tickCount;
 +        // Sakura end - fix endermen teleporting causing lag
 +
-         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos(x, y, z);
+         BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos(x, y, z);
  
-         while (mutableBlockPos.getY() > this.level().getMinY() && !this.level().getBlockState(mutableBlockPos).blocksMotion()) {
+         while (pos.getY() > this.level().getMinY() && !this.level().getBlockState(pos).blocksMotion()) {

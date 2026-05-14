@@ -7,7 +7,7 @@ import org.spongepowered.configurate.transformation.ConfigurationTransformation;
 import java.util.Map;
 
 import static org.spongepowered.configurate.NodePath.path;
-import static org.spongepowered.configurate.transformation.TransformAction.*;
+import static org.spongepowered.configurate.transformation.TransformAction.rename;
 
 @NullMarked
 public final class V3_RenameKnockback {

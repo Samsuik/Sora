@@ -26,28 +26,15 @@ public final class MechanicVersion {
     public static final short v1_21_6 = MinecraftVersionEncoding.v1xy(21, 6);
     public static final short v1_21_9 = MinecraftVersionEncoding.v1xy(21, 9);
     public static final short v1_21_10 = MinecraftVersionEncoding.v1xy(21, 10);
+    public static final short v1_21_11 = MinecraftVersionEncoding.v1xy(21, 11);
+    public static final short v26_2_s1 = MinecraftVersionEncoding.snapshot(26, 2, 1);
+    public static final short v26_2_s6 = MinecraftVersionEncoding.snapshot(26, 2, 6);
 
-    public static String name(final short version) {
-        if (version == LATEST) {
-            return "latest";
-        } else if (version == LEGACY) {
-            return "legacy";
-        }
-
-        final int significant = MinecraftVersionEncoding.significant(version);
-        if (MinecraftVersionEncoding.isSnapshot(version)) {
-            if (MinecraftVersionEncoding.isModernSnapshot(version)) {
-                final int gameDrop = MinecraftVersionEncoding.gameDrop(version);
-                final int patch = MinecraftVersionEncoding.patch(version);
-                return String.format("%d.%d-snapshot-%d", significant, gameDrop, patch);
-            } else {
-                final int revision = MinecraftVersionEncoding.revision(version);
-                return String.format("%dw%d", significant, revision);
-            }
-        }
-
-        final int major = MinecraftVersionEncoding.major(version);
-        final int minor = MinecraftVersionEncoding.minor(version);
-        return String.format("%d.%d.%d", significant, major, minor);
+    public static String name(final short mechanicVersion) {
+        return switch (mechanicVersion) {
+            case MechanicVersion.LATEST -> "latest";
+            case MechanicVersion.LEGACY -> "legacy";
+            default -> MinecraftVersionEncoding.asString(mechanicVersion);
+        };
     }
 }

@@ -4,7 +4,7 @@ import me.samsuik.sakura.configuration.transformation.ConfigurationTransformatio
 import org.spongepowered.configurate.NodePath;
 import org.spongepowered.configurate.transformation.ConfigurationTransformation;
 
-import static org.spongepowered.configurate.NodePath.*;
+import static org.spongepowered.configurate.NodePath.path;
 import static org.spongepowered.configurate.transformation.TransformAction.rename;
 
 public final class V7_FixTntDuplicationName {

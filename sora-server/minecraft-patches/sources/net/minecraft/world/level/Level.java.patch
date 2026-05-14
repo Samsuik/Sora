@@ -1,6 +1,6 @@
 --- a/net/minecraft/world/level/Level.java
 +++ b/net/minecraft/world/level/Level.java
-@@ -115,7 +_,7 @@
+@@ -121,7 +_,7 @@
      public final List<TickingBlockEntity> blockEntityTickers = Lists.newArrayList();
      public final CollectingNeighborUpdater neighborUpdater;
      private final List<TickingBlockEntity> pendingBlockEntityTickers = Lists.newArrayList();
@@ -9,7 +9,7 @@
      public final Thread thread;
      private final boolean isDebug;
      private int skyDarken;
-@@ -164,6 +_,18 @@
+@@ -170,6 +_,18 @@
          return this.paperConfig;
      }
      // Paper end - add paper world config
@@ -28,7 +28,7 @@
  
      public final org.purpurmc.purpur.PurpurWorldConfig purpurConfig; // Purpur - Purpur config files
      public static @Nullable BlockPos lastPhysicsProblem; // Spigot
-@@ -876,6 +_,7 @@
+@@ -882,6 +_,7 @@
          org.bukkit.World.Environment environment, // Paper
          java.util.function.Function<org.spigotmc.SpigotWorldConfig, // Spigot - create per world config
          io.papermc.paper.configuration.WorldConfiguration> paperWorldConfigCreator, // Paper - create paper world config
@@ -36,11 +36,11 @@
          java.util.concurrent.Executor executor // Paper - Anti-Xray
      ) {
          // Paper start - getblock optimisations - cache world height/sections
-@@ -891,6 +_,7 @@
+@@ -898,6 +_,7 @@
          this.paperConfig = paperWorldConfigCreator.apply(this.spigotConfig); // Paper - create paper world config
-         this.purpurConfig = new org.purpurmc.purpur.PurpurWorldConfig(((net.minecraft.world.level.storage.PrimaryLevelData) levelData).getLevelName(), environment); // Purpur - Purpur config files
+         this.purpurConfig = new org.purpurmc.purpur.PurpurWorldConfig(bukkitName, environment, worldKey); // Purpur - Purpur config files
          this.playerBreedingCooldowns = this.getNewBreedingCooldownCache(); // Purpur - Add adjustable breeding cooldown to config
 +        this.sakuraConfig = sakuraWorldConfigCreator.get(); // Sakura - sakura configuration files
          this.generator = generator;
-         this.world = new CraftWorld((ServerLevel) this, generator, biomeProvider, environment);
+         this.world = new CraftWorld((ServerLevel) this, worldKey, biomeProvider, environment);
  

@@ -6,7 +6,7 @@ import org.spongepowered.configurate.transformation.ConfigurationTransformation;
 
 import static me.samsuik.sakura.configuration.transformation.ConfigurationTransformations.move;
 import static me.samsuik.sakura.configuration.transformation.ConfigurationTransformations.newValue;
-import static org.spongepowered.configurate.NodePath.*;
+import static org.spongepowered.configurate.NodePath.path;
 
 @NullMarked
 public final class V9_RenameAllowNonTntBreakingDurableBlocks {

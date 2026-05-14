@@ -7,7 +7,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 
-import static me.samsuik.sakura.configuration.local.ConfigurationContainer.*;
+import static me.samsuik.sakura.configuration.local.ConfigurationContainer.SealedConfigurationContainer;
 
 @NullMarked
 public final class LocalConfigurationContainers {

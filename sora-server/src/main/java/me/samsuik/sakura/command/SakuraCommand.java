@@ -5,7 +5,7 @@ import net.minecraft.server.MinecraftServer;
 import org.bukkit.command.Command;
 import org.jspecify.annotations.NullMarked;
 
-import java.util.*;
+import java.util.List;
 
 @NullMarked
 public final class SakuraCommand extends BaseMenuCommand {
@@ -28,6 +28,9 @@ public final class SakuraCommand extends BaseMenuCommand {
     @Override
     public Iterable<Command> subCommands() {
         final Command versionCommand = MinecraftServer.getServer().server.getCommandMap().getCommand("version");
+        if (versionCommand == null) {
+            return SakuraCommands.SUB_COMMANDS;
+        }
         return Iterables.concat(SakuraCommands.SUB_COMMANDS, List.of(versionCommand));
     }
 }

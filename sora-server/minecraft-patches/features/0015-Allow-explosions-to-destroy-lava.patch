@@ -1,0 +1,35 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Samsuik <kfian294ma4@gmail.com>
+Date: Sat, 25 Nov 2023 21:14:45 +0000
+Subject: [PATCH] Allow explosions to destroy lava
+
+
+diff --git a/net/minecraft/world/level/ServerExplosion.java b/net/minecraft/world/level/ServerExplosion.java
+index e2122858308458eafa03569d1e3f36d16b87d9e6..c323f076bc73deadf3f4729d45ec0a6efc9f9eff 100644
+--- a/net/minecraft/world/level/ServerExplosion.java
++++ b/net/minecraft/world/level/ServerExplosion.java
+@@ -382,6 +382,11 @@ public class ServerExplosion implements Explosion {
+                 return Optional.of(ZERO_RESISTANCE);
+             }
+             // Sakura end - destroy water logged blocks
++            // Sakura start - allow explosions to destroy lava
++            if (blockState.is(net.minecraft.world.level.block.Blocks.LAVA) && this.level.sakuraConfig().cannons.explosion.explodeLava) {
++                return Optional.of(ZERO_RESISTANCE);
++            }
++            // Sakura end - allow explosions to destroy lava
+         }
+ 
+         return this.damageCalculator.getBlockExplosionResistance(this, this.level, pos, blockState, fluidState);
+diff --git a/net/minecraft/world/level/block/state/BlockBehaviour.java b/net/minecraft/world/level/block/state/BlockBehaviour.java
+index 1003870bab970d708936181679cc41bb2d575186..bebd38d386bcc2c737d1d20828aeacc01994cdf6 100644
+--- a/net/minecraft/world/level/block/state/BlockBehaviour.java
++++ b/net/minecraft/world/level/block/state/BlockBehaviour.java
+@@ -205,7 +205,7 @@ public abstract class BlockBehaviour implements FeatureElement {
+                 state.getDrops(params).forEach(stack -> onHit.accept(stack, pos));
+             }
+ 
+-            level.setBlock(pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
++            level.setBlock(pos, Blocks.AIR.defaultBlockState(), level.sakuraConfig().cannons.explosion.explodeLava && state.is(Blocks.LAVA) ? Block.UPDATE_CLIENTS : Block.UPDATE_ALL); // Sakura - allow explosions to destroy lava; don't cause block updates when blowing up lava
+             block.wasExploded(level, pos, explosion);
+         }
+     }
