@@ -171,7 +171,7 @@ index 821878a1a6073e0a6bce413c052a0cc744e3ae0c..0299fb15722cf99e14bd0424663e6975
      }
  
 diff --git a/net/minecraft/world/entity/item/FallingBlockEntity.java b/net/minecraft/world/entity/item/FallingBlockEntity.java
-index 9acbc05b1b3f9b88f7ad03796dc508051b8b6295..f7caf2498cb1256401482f0ee70401c3c0f51e2b 100644
+index 861a74cbdf95243e1fd1fbda04195c53b4e30965..28df98618a063acc3707a780a056739dc2774c70 100644
 --- a/net/minecraft/world/entity/item/FallingBlockEntity.java
 +++ b/net/minecraft/world/entity/item/FallingBlockEntity.java
 @@ -232,7 +232,7 @@ public class FallingBlockEntity extends Entity implements me.samsuik.sakura.enti
@@ -184,7 +184,7 @@ index 9acbc05b1b3f9b88f7ad03796dc508051b8b6295..f7caf2498cb1256401482f0ee70401c3
  
      public BlockPos getStartPos() {
 diff --git a/net/minecraft/world/entity/item/PrimedTnt.java b/net/minecraft/world/entity/item/PrimedTnt.java
-index 9f017cba3b18238ed938f057b083f76038fa0353..e3a6eaaefa1c9707f65c53ba8f0ff19d6aa65556 100644
+index a21b0c31b984e7e8fe2943001d42a7bf4727e8ef..0dd2f1112273bb3deedb6739a45ada9b0f48e42e 100644
 --- a/net/minecraft/world/entity/item/PrimedTnt.java
 +++ b/net/minecraft/world/entity/item/PrimedTnt.java
 @@ -285,7 +285,11 @@ public class PrimedTnt extends Entity implements TraceableEntity, me.samsuik.sak

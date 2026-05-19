@@ -5,7 +5,7 @@ Subject: [PATCH] Configure breaking blocks outside the world border
 
 
 diff --git a/net/minecraft/world/level/ServerExplosion.java b/net/minecraft/world/level/ServerExplosion.java
-index 71bb0074b1cf078a67b0efcc3d91a2ca1e240920..7ba5c0f73effcd39319dee04ebf7d688fb6bf991 100644
+index a602bc8be4bd69c0386ecc7a47fd23e7b37f09ea..7c46a95663233da97cb956bf6eea0d6dd8dc93af 100644
 --- a/net/minecraft/world/level/ServerExplosion.java
 +++ b/net/minecraft/world/level/ServerExplosion.java
 @@ -532,6 +532,12 @@ public class ServerExplosion implements Explosion {

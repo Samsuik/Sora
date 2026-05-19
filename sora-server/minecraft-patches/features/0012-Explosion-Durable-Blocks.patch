@@ -4,12 +4,24 @@ Date: Wed, 15 Nov 2023 23:18:38 +0000
 Subject: [PATCH] Explosion Durable Blocks
 
 
+diff --git a/me/samsuik/sakura/SakuraFeatureHooks.java b/me/samsuik/sakura/SakuraFeatureHooks.java
+index 498a4b40ab49b005171a90a73e57e42a0f1e536d..31b61480691b287c3ee19213a1208965e6017f67 100644
+--- a/me/samsuik/sakura/SakuraFeatureHooks.java
++++ b/me/samsuik/sakura/SakuraFeatureHooks.java
+@@ -25,6 +25,7 @@ public final class SakuraFeatureHooks {
+     }
+ 
+     public static void setDurableMaterialExpiration(final Identifier worldIdentifier, final Duration duration) {
++        getLevel(worldIdentifier).ifPresent(level -> level.durabilityManager.updateExpirationTimer(duration.seconds(), TimeUnit.SECONDS)); // Sakura - explosion durable blocks
+     }
+ 
+     private static Optional<Level> getLevel(final Identifier worldIdentifier) {
 diff --git a/me/samsuik/sakura/explosion/DurableBlockManager.java b/me/samsuik/sakura/explosion/DurableBlockManager.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..cf07fbc434ed02b5e2c3b4b9eb9095daef1c4a30
+index 0000000000000000000000000000000000000000..02f2944e78504d4be7857767a168c64c27c2f800
 --- /dev/null
 +++ b/me/samsuik/sakura/explosion/DurableBlockManager.java
-@@ -0,0 +1,52 @@
+@@ -0,0 +1,60 @@
 +package me.samsuik.sakura.explosion;
 +
 +import com.google.common.cache.Cache;
@@ -22,10 +34,18 @@ index 0000000000000000000000000000000000000000..cf07fbc434ed02b5e2c3b4b9eb9095da
 +
 +@NullMarked
 +public final class DurableBlockManager {
-+    private final Cache<BlockPos, DurableBlock> durableBlocks = CacheBuilder.newBuilder()
-+            .expireAfterAccess(1, TimeUnit.MINUTES)
++    private Cache<BlockPos, DurableBlock> durableBlocks;
++
++    public DurableBlockManager() {
++        this.updateExpirationTimer(1, TimeUnit.MINUTES);
++    }
++
++    public void updateExpirationTimer(final long duration, final TimeUnit unit) {
++        this.durableBlocks = CacheBuilder.newBuilder()
++            .expireAfterAccess(duration, unit)
 +            .maximumSize(Short.MAX_VALUE)
 +            .build();
++    }
 +
 +    public boolean damage(final BlockPos blockPos, final DurableMaterial material) {
 +        DurableBlock block = this.durableBlocks.getIfPresent(blockPos);
@@ -110,7 +130,7 @@ index 134d96a70625d2f648cb6b0f9f16e3a5570900f9..93d59eacb8a77366f2135fbbb89f7a86
      protected Level(
          final WritableLevelData levelData,
 diff --git a/net/minecraft/world/level/ServerExplosion.java b/net/minecraft/world/level/ServerExplosion.java
-index 4d6910a60dbe7e825e884744d283263119570f85..493fb2d2035069e5d98ad382fbb25a940a871ec1 100644
+index 9ed58f05dcc6bfd6056fd7c75821a802f3202f35..b79f87017fe0a93a3ab921777fc1acc903c2b9ed 100644
 --- a/net/minecraft/world/level/ServerExplosion.java
 +++ b/net/minecraft/world/level/ServerExplosion.java
 @@ -125,7 +125,7 @@ public class ServerExplosion implements Explosion {

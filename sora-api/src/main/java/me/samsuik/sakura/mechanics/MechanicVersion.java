@@ -27,8 +27,6 @@ public final class MechanicVersion {
     public static final short v1_21_9 = MinecraftVersionEncoding.v1xy(21, 9);
     public static final short v1_21_10 = MinecraftVersionEncoding.v1xy(21, 10);
     public static final short v1_21_11 = MinecraftVersionEncoding.v1xy(21, 11);
-    public static final short v26_2_s1 = MinecraftVersionEncoding.snapshot(26, 2, 1);
-    public static final short v26_2_s6 = MinecraftVersionEncoding.snapshot(26, 2, 6);
 
     public static String name(final short mechanicVersion) {
         return switch (mechanicVersion) {

@@ -5,7 +5,7 @@ Subject: [PATCH] Add entity travel distance limits
 
 
 diff --git a/net/minecraft/server/level/ServerLevel.java b/net/minecraft/server/level/ServerLevel.java
-index 2aab4e9258f522e5a4bd6940d2e20f6d4a59e6a5..15a2fb71213ac2410afd132a6b33029f20be381f 100644
+index 55f68620cf0fbb16b008dfdbac688996e1b596ed..647058886a4577f59869abd3d32c750ca5cf1494 100644
 --- a/net/minecraft/server/level/ServerLevel.java
 +++ b/net/minecraft/server/level/ServerLevel.java
 @@ -1474,6 +1474,11 @@ public class ServerLevel extends Level implements WorldGenLevel, ServerEntityGet

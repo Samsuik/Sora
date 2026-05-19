@@ -5,7 +5,7 @@ Subject: [PATCH] Protect blocks above a configured Y-level from explosions
 
 
 diff --git a/net/minecraft/world/level/ServerExplosion.java b/net/minecraft/world/level/ServerExplosion.java
-index 7ba5c0f73effcd39319dee04ebf7d688fb6bf991..5df070fdfdf79c6f74e9b28bb60cbef7fb5a7002 100644
+index 7c46a95663233da97cb956bf6eea0d6dd8dc93af..23a63a6dc5d3e65b7c09ad5beeef8ff8f1a310d0 100644
 --- a/net/minecraft/world/level/ServerExplosion.java
 +++ b/net/minecraft/world/level/ServerExplosion.java
 @@ -374,6 +374,11 @@ public class ServerExplosion implements Explosion {

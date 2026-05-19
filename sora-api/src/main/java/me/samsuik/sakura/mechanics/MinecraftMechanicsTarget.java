@@ -48,12 +48,8 @@ public record MinecraftMechanicsTarget(short mechanicVersion, byte serverType) {
         return this.mechanicVersion == MechanicVersion.LEGACY;
     }
 
-    public boolean isLatest() {
-        return this.mechanicVersion == MechanicVersion.LATEST;
-    }
-
     public boolean isSnapshot() {
-        return !this.isLatest() && MinecraftVersionEncoding.isSnapshot(this.mechanicVersion);
+        return MinecraftVersionEncoding.isSnapshot(this.mechanicVersion);
     }
 
     public boolean isVanilla() {

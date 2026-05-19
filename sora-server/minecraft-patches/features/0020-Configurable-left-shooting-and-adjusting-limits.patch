@@ -77,7 +77,7 @@ index 7677749a61b08a596d42915999b75c951edad1b3..98ec3bf69110f29cdb79b24f83caf6ae
              if (x != 0.0) {
                  currentBox = ca.spottedleaf.moonrise.patches.collisions.CollisionUtil.offsetX(currentBox, x);
 diff --git a/net/minecraft/world/entity/item/FallingBlockEntity.java b/net/minecraft/world/entity/item/FallingBlockEntity.java
-index d9d8acc6cb92e9624388ba83a372cf50e3f60f9b..ca85ab7557e25b0578ac388a8128540ad552b978 100644
+index 613dd905cb86be92ac8de285099c00748671fee0..bb97efcf2321d7f9cb70e95aae5f032cc1fcfc45 100644
 --- a/net/minecraft/world/entity/item/FallingBlockEntity.java
 +++ b/net/minecraft/world/entity/item/FallingBlockEntity.java
 @@ -274,6 +274,7 @@ public class FallingBlockEntity extends Entity implements me.samsuik.sakura.enti

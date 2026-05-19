@@ -5,7 +5,7 @@ Subject: [PATCH] Destroy Waterlogged Blocks
 
 
 diff --git a/net/minecraft/world/level/ServerExplosion.java b/net/minecraft/world/level/ServerExplosion.java
-index 493fb2d2035069e5d98ad382fbb25a940a871ec1..e2122858308458eafa03569d1e3f36d16b87d9e6 100644
+index b79f87017fe0a93a3ab921777fc1acc903c2b9ed..d250fc0cd523b151424ef0eb8ddf0ee42455896b 100644
 --- a/net/minecraft/world/level/ServerExplosion.java
 +++ b/net/minecraft/world/level/ServerExplosion.java
 @@ -377,6 +377,11 @@ public class ServerExplosion implements Explosion {

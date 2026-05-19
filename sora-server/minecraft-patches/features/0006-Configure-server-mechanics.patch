@@ -1799,7 +1799,7 @@ index 34cc0cb16d609ef1ac6d8da1e8e8248d85fbf586..959c89d5f4de832e87807d99ad064d0b
      protected Level(
          final WritableLevelData levelData,
 diff --git a/net/minecraft/world/level/ServerExplosion.java b/net/minecraft/world/level/ServerExplosion.java
-index bf0f3117193cfe8842192a573be6fa3553d3ec70..4d6910a60dbe7e825e884744d283263119570f85 100644
+index 32dceea5522b925ad8b4765666b16c1516618168..9ed58f05dcc6bfd6056fd7c75821a802f3202f35 100644
 --- a/net/minecraft/world/level/ServerExplosion.java
 +++ b/net/minecraft/world/level/ServerExplosion.java
 @@ -347,6 +347,25 @@ public class ServerExplosion implements Explosion {
@@ -2140,7 +2140,7 @@ index a0992572a6bd4d1c9745195dbbefbf99959f6829..5a3be369119353ec5cf26b2e4e7f95b2
          }
      }
 diff --git a/net/minecraft/world/level/block/piston/PistonHeadBlock.java b/net/minecraft/world/level/block/piston/PistonHeadBlock.java
-index f8caa0b3c21766dbad73c524c1680346e4257188..5703513b1be21ccc898f6103e01f0174f3de26d9 100644
+index f8caa0b3c21766dbad73c524c1680346e4257188..43b518724d8295447b45041f51f0d5695453c439 100644
 --- a/net/minecraft/world/level/block/piston/PistonHeadBlock.java
 +++ b/net/minecraft/world/level/block/piston/PistonHeadBlock.java
 @@ -105,6 +105,11 @@ public class PistonHeadBlock extends DirectionalBlock {
@@ -2149,7 +2149,7 @@ index f8caa0b3c21766dbad73c524c1680346e4257188..5703513b1be21ccc898f6103e01f0174
          BlockState base = level.getBlockState(pos.relative(state.getValue(FACING).getOpposite()));
 +        // Sakura start - configure server mechanics
 +        if (level instanceof Level gameLevel && gameLevel.localConfig().at(pos).mechanicsTarget.before(me.samsuik.sakura.mechanics.MechanicVersion.v1_9)) {
-+            return this.isFittingBase(state, state);
++            return this.isFittingBase(state, base);
 +        }
 +        // Sakura end - configure server mechanics
          return this.isFittingBase(state, base) || base.is(Blocks.MOVING_PISTON) && base.getValue(FACING) == state.getValue(FACING);
