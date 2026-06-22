@@ -5,7 +5,7 @@ Subject: [PATCH] Client Visibility Settings
 
 
 diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
-index d15349f30176bb0469ab0314ca4e1f75ab2303c6..af1c16a79d04116b76d81490a3cd6d753a0f834a 100644
+index 4d6624b80373e619d2ce2bfd6a73f93a0bd2f1b4..287488b0711b97cb80cf8b35da048fa29d061518 100644
 --- a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
 @@ -2251,6 +2251,11 @@ public class CraftPlayer extends CraftHumanEntity implements Player, PluginMessa

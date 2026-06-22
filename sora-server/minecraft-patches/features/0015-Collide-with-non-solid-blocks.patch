@@ -5,7 +5,7 @@ Subject: [PATCH] Collide with non-solid blocks
 
 
 diff --git a/ca/spottedleaf/moonrise/patches/collisions/CollisionUtil.java b/ca/spottedleaf/moonrise/patches/collisions/CollisionUtil.java
-index 0cb1906c33589592ab42bef31569d55b5ffb9fd4..07ab8f4151fca1887fde8dc7942f810933c82bd9 100644
+index cbc89218e747c3383390866831625e606f736ff8..2a7f0605cd954e42e070534dd83466abbc910696 100644
 --- a/ca/spottedleaf/moonrise/patches/collisions/CollisionUtil.java
 +++ b/ca/spottedleaf/moonrise/patches/collisions/CollisionUtil.java
 @@ -1905,6 +1905,7 @@ public final class CollisionUtil {
@@ -32,7 +32,7 @@ index 0cb1906c33589592ab42bef31569d55b5ffb9fd4..07ab8f4151fca1887fde8dc7942f8109
 +                    final boolean hasSpecial = !fullBlocks && ((BlockCountingChunkSection)section).moonrise$hasSpecialCollidingBlocks(); // Sakura - collide with non-solid blocks
                      final int sectionAdjust = !hasSpecial ? 1 : 0;
  
-                     final PalettedContainer<BlockState> blocks = section.states;
+                     final PalettedContainer<BlockState> blocks = section.getStates();
 @@ -2046,6 +2048,11 @@ public final class CollisionUtil {
                                      mutablePos.set(blockX, blockY, blockZ);
                                      if (useEntityCollisionShape) {
@@ -46,7 +46,7 @@ index 0cb1906c33589592ab42bef31569d55b5ffb9fd4..07ab8f4151fca1887fde8dc7942f8109
                                          blockCollision = blockData.getCollisionShape(world, mutablePos, collisionShape);
                                      }
 diff --git a/net/minecraft/world/entity/Entity.java b/net/minecraft/world/entity/Entity.java
-index fdac5238ee6c9b8673712b5258d8133bc03f10d0..3b199ea7747429e7abff6b645a40819b121639fa 100644
+index 2c2b7e8230b9f8b4f2360c1c02fe917fc2cf80fc..e02aba18d92b80428eb2873b06bac635f021abfb 100644
 --- a/net/minecraft/world/entity/Entity.java
 +++ b/net/minecraft/world/entity/Entity.java
 @@ -583,6 +583,14 @@ public abstract class Entity

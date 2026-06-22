@@ -506,10 +506,10 @@ index 0000000000000000000000000000000000000000..78c9fc17c361abdcee8f549e94a05d8e
 +    }
 +}
 diff --git a/net/minecraft/world/level/Level.java b/net/minecraft/world/level/Level.java
-index 53b91b6eae8748e538048b548b23475744287598..f89890a8c31ec25509712eb0b4dabed74fa43336 100644
+index 3063e0c9de5a47c0df9e25bb0f438c3e8d9799f9..94b7cc519ca14801ecdf823d5c9d823a0cb2154e 100644
 --- a/net/minecraft/world/level/Level.java
 +++ b/net/minecraft/world/level/Level.java
-@@ -892,6 +892,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable, ca.spottedl
+@@ -893,6 +893,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable, ca.spottedl
      public final me.samsuik.sakura.explosion.density.ExplosionObstructionCache obstructionCache = new me.samsuik.sakura.explosion.density.ExplosionObstructionCache(); // Sakura - optimise explosions
      public final me.samsuik.sakura.mechanics.sake.DispenseRelocationHandler dispenseRelocationHandler = new me.samsuik.sakura.mechanics.sake.DispenseRelocationHandler(this); // Sakura - configure server mechanics
      public final me.samsuik.sakura.explosion.DurableBlockManager durabilityManager = new me.samsuik.sakura.explosion.DurableBlockManager(); // Sakura - explosion durable blocks
@@ -518,7 +518,7 @@ index 53b91b6eae8748e538048b548b23475744287598..f89890a8c31ec25509712eb0b4dabed7
      protected Level(
          final WritableLevelData levelData,
 diff --git a/net/minecraft/world/level/block/RedStoneWireBlock.java b/net/minecraft/world/level/block/RedStoneWireBlock.java
-index a96f90bf8962a042dd096b64c3af5fc0c3d321f7..9a774079ff7f4fbd4ffa532f96e64ce8941f295c 100644
+index 30d851052de53035849607fa04b07d2d5f92489b..0a42e99b11faba42f3022359d8a2ebbf2714073c 100644
 --- a/net/minecraft/world/level/block/RedStoneWireBlock.java
 +++ b/net/minecraft/world/level/block/RedStoneWireBlock.java
 @@ -305,6 +305,22 @@ public class RedStoneWireBlock extends Block {
@@ -579,10 +579,10 @@ index a96f90bf8962a042dd096b64c3af5fc0c3d321f7..9a774079ff7f4fbd4ffa532f96e64ce8
                      : power;
              }
 diff --git a/net/minecraft/world/level/block/state/BlockBehaviour.java b/net/minecraft/world/level/block/state/BlockBehaviour.java
-index bebd38d386bcc2c737d1d20828aeacc01994cdf6..93528b17e61edac3f36d0f9ca6e494d417a778ba 100644
+index 8eb15b39726c175c5e5ef1b301afafbb97f44a85..5cad29663455bb1772e131de5294aed5fcbff14a 100644
 --- a/net/minecraft/world/level/block/state/BlockBehaviour.java
 +++ b/net/minecraft/world/level/block/state/BlockBehaviour.java
-@@ -539,6 +539,13 @@ public abstract class BlockBehaviour implements FeatureElement {
+@@ -541,6 +541,13 @@ public abstract class BlockBehaviour implements FeatureElement {
              return this.constantCollisionShape;
          }
          // Paper end - optimise collisions
@@ -596,7 +596,7 @@ index bebd38d386bcc2c737d1d20828aeacc01994cdf6..93528b17e61edac3f36d0f9ca6e494d4
  
          protected BlockStateBase(final Block owner, final Property<?>[] propertyKeys, final Comparable<?>[] propertyValues) {
              super(owner, propertyKeys, propertyValues);
-@@ -652,6 +659,7 @@ public abstract class BlockBehaviour implements FeatureElement {
+@@ -658,6 +665,7 @@ public abstract class BlockBehaviour implements FeatureElement {
                  }
              }
              // Paper end - optimise collisions
@@ -605,7 +605,7 @@ index bebd38d386bcc2c737d1d20828aeacc01994cdf6..93528b17e61edac3f36d0f9ca6e494d4
  
          public Block getBlock() {
 diff --git a/net/minecraft/world/level/redstone/CollectingNeighborUpdater.java b/net/minecraft/world/level/redstone/CollectingNeighborUpdater.java
-index deb62cf4b878f34ba13f83faf711c0666f12e6fa..7c20c212034d78990f05e64def3ec76d16f99613 100644
+index 1c7862ae4eaeb4d83e0fb423c86489f534e92be5..41a9228149bfc8a3e776518f338a6aa0075877f8 100644
 --- a/net/minecraft/world/level/redstone/CollectingNeighborUpdater.java
 +++ b/net/minecraft/world/level/redstone/CollectingNeighborUpdater.java
 @@ -23,6 +23,13 @@ public class CollectingNeighborUpdater implements NeighborUpdater {
@@ -668,7 +668,7 @@ index 2540a39f40827ff864a9b3e8bec5cb7b43dbcebd..480366f930e4f6ea04d6d69d989e562c
              }
          }
 diff --git a/net/minecraft/world/level/redstone/NeighborUpdater.java b/net/minecraft/world/level/redstone/NeighborUpdater.java
-index 353085151026b0d695be3c35d0638ecd39a962ce..abff9d8962c2100ecc4ceedcf52e0d858c160412 100644
+index 041ed95948ff6bb4cf3610ce4522a6ba105b6812..f39f10408705d1a92a5c884c8276d09ddfdb2b3e 100644
 --- a/net/minecraft/world/level/redstone/NeighborUpdater.java
 +++ b/net/minecraft/world/level/redstone/NeighborUpdater.java
 @@ -17,6 +17,12 @@ import org.jspecify.annotations.Nullable;

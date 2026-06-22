@@ -5,10 +5,10 @@ Subject: [PATCH] Use maxEntityCollision limit for entity retrieval
 
 
 diff --git a/net/minecraft/world/entity/LivingEntity.java b/net/minecraft/world/entity/LivingEntity.java
-index 0e6a2d4280d3768bd7322a888b1a824ce4ec943c..ea2c65bf90a2c3221fe9ca1234a092735155ec36 100644
+index be3db838731e40179340c739c2e2ed677af97681..dffc4cb034f5ada6bf1bbfd24d575e04537e99d4 100644
 --- a/net/minecraft/world/entity/LivingEntity.java
 +++ b/net/minecraft/world/entity/LivingEntity.java
-@@ -4149,7 +4149,17 @@ public abstract class LivingEntity extends Entity implements Attackable, Waypoin
+@@ -4163,7 +4163,17 @@ public abstract class LivingEntity extends Entity implements Attackable, Waypoin
              return;
          }
          // Paper end - don't run getEntities if we're not going to use its result

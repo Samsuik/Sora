@@ -1,11 +1,11 @@
 --- a/net/minecraft/world/item/BoatItem.java
 +++ b/net/minecraft/world/item/BoatItem.java
-@@ -64,7 +_,7 @@
-                 } else {
-                     boat.setYRot(player.getYRot());
-                     if (!level.purpurConfig.persistentDroppableEntityDisplayNames) boat.setCustomName(null); // Purpur - Apply display names from item forms of entities to entities and vice versa
--                    if (!level.noCollision(boat, boat.getBoundingBox())) {
-+                    if (!level.noCollision(boat, boat.getBoundingBox()) || !level.getWorldBorder().isWithinBounds(boat.getBoundingBox())) { // Sakura - fix placing boats outside the world border
-                         return InteractionResult.FAIL;
-                     } else {
-                         if (!level.isClientSide()) {
+@@ -66,7 +_,7 @@
+ 
+             boat.setYRot(player.getYRot());
+             if (!level.purpurConfig.persistentDroppableEntityDisplayNames) boat.setCustomName(null); // Purpur - Apply display names from item forms of entities to entities and vice versa
+-            if (!level.noCollision(boat, boat.getBoundingBox())) {
++            if (!level.noCollision(boat, boat.getBoundingBox()) || !level.getWorldBorder().isWithinBounds(boat.getBoundingBox())) { // Sakura - fix placing boats outside the world border
+                 return InteractionResult.FAIL;
+             }
+ 

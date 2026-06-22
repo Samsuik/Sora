@@ -1,10 +1,13 @@
 package me.samsuik.sakura.mechanics;
 
+import org.jspecify.annotations.NullMarked;
+
 /**
  * All post-1.8 Minecraft versions with changes to cannon mechanics.
  * <p>
  * Versions are encoded as shorts see {@link MinecraftVersionEncoding}.
  */
+@NullMarked
 public final class MechanicVersion {
     public static final short LATEST = Short.MAX_VALUE;
     public static final short LEGACY = Short.MIN_VALUE;
@@ -27,6 +30,7 @@ public final class MechanicVersion {
     public static final short v1_21_9 = MinecraftVersionEncoding.v1xy(21, 9);
     public static final short v1_21_10 = MinecraftVersionEncoding.v1xy(21, 10);
     public static final short v1_21_11 = MinecraftVersionEncoding.v1xy(21, 11);
+    public static final short v26_2 = MinecraftVersionEncoding.encode(26, 2, 0);
 
     public static String name(final short mechanicVersion) {
         return switch (mechanicVersion) {

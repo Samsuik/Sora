@@ -5,7 +5,7 @@ Subject: [PATCH] Client Visibility Settings
 
 
 diff --git a/me/samsuik/sakura/SakuraFeatureHooks.java b/me/samsuik/sakura/SakuraFeatureHooks.java
-index b50180c43634544ac693662a90701ebf007225d4..498a4b40ab49b005171a90a73e57e42a0f1e536d 100644
+index 568cc57e7f8b7fb63255964a86ddd0988f01bf08..3f2d4a9d4cb78fb4b3b203fe232b7dfa4a2dbd97 100644
 --- a/me/samsuik/sakura/SakuraFeatureHooks.java
 +++ b/me/samsuik/sakura/SakuraFeatureHooks.java
 @@ -1,6 +1,9 @@
@@ -18,8 +18,8 @@ index b50180c43634544ac693662a90701ebf007225d4..498a4b40ab49b005171a90a73e57e42a
  import net.minecraft.core.registries.Registries;
  import net.minecraft.resources.Identifier;
  import net.minecraft.resources.ResourceKey;
-@@ -14,6 +17,11 @@ import java.util.concurrent.TimeUnit;
- 
+@@ -16,6 +19,11 @@ import java.util.concurrent.TimeUnit;
+ @NullMarked
  public final class SakuraFeatureHooks {
      public static void setupCommands(final Map<String, Command> commands) {
 +        // Sakura start - client visibility settings
@@ -95,10 +95,10 @@ index 0000000000000000000000000000000000000000..6450f2013eb71b956fcdfb2aa8ba0050
 +}
 diff --git a/me/samsuik/sakura/player/visibility/FilterOrModifyPackets.java b/me/samsuik/sakura/player/visibility/FilterOrModifyPackets.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..09bf28d04723094ff7c61571c1a1be1152d6a231
+index 0000000000000000000000000000000000000000..3cc3b047cdd871e5f80ccd8b65c4b9fb0582f7bb
 --- /dev/null
 +++ b/me/samsuik/sakura/player/visibility/FilterOrModifyPackets.java
-@@ -0,0 +1,106 @@
+@@ -0,0 +1,109 @@
 +package me.samsuik.sakura.player.visibility;
 +
 +import net.minecraft.network.protocol.Packet;
@@ -109,7 +109,8 @@ index 0000000000000000000000000000000000000000..09bf28d04723094ff7c61571c1a1be11
 +import net.minecraft.server.level.ServerPlayer;
 +import net.minecraft.world.entity.Entity;
 +import net.minecraft.world.entity.EntityType;
-+import net.minecraft.world.level.block.entity.BlockEntityType;
++import net.minecraft.world.entity.EntityTypes;
++import net.minecraft.world.level.block.entity.BlockEntityTypes;
 +import net.minecraft.world.level.block.piston.PistonBaseBlock;
 +import net.minecraft.world.phys.Vec3;
 +import org.jspecify.annotations.NullMarked;
@@ -146,12 +147,14 @@ index 0000000000000000000000000000000000000000..09bf28d04723094ff7c61571c1a1be11
 +
 +        final EntityType<?> entityType = entity.getType();
 +        final VisibilityType type;
-+        if (entityType == EntityType.TNT) {
++        if (entityType == EntityTypes.TNT) {
 +            type = VisibilityTypes.TNT;
-+        } else if (entityType == EntityType.FALLING_BLOCK) {
++        } else if (entityType == EntityTypes.FALLING_BLOCK) {
 +            type = VisibilityTypes.SAND;
-+        } else if (entityType == EntityType.WIND_CHARGE || entityType == EntityType.BREEZE_WIND_CHARGE) {
++        } else if (entityType == EntityTypes.WIND_CHARGE || entityType == EntityTypes.BREEZE_WIND_CHARGE) {
 +            type = VisibilityTypes.WIND_CHARGE;
++        } else if (entityType == EntityTypes.SULFUR_CUBE) {
++            type = VisibilityTypes.SULFUR_CUBE;
 +        } else {
 +            return true;
 +        }
@@ -167,7 +170,7 @@ index 0000000000000000000000000000000000000000..09bf28d04723094ff7c61571c1a1be11
 +    private static boolean filterExtraPackets(final Packet<?> packet, final ServerPlayer player) {
 +        final VisibilitySettings settings = player.visibilitySettings;
 +        if (settings.isToggled(VisibilityTypes.SPAWNERS) && packet instanceof final ClientboundBlockEntityDataPacket bedPacket) {
-+            return bedPacket.getType() == BlockEntityType.MOB_SPAWNER;
++            return bedPacket.getType() == BlockEntityTypes.MOB_SPAWNER;
 +        }
 +
 +        return false;
@@ -190,10 +193,10 @@ index 0000000000000000000000000000000000000000..09bf28d04723094ff7c61571c1a1be11
 +            }
 +
 +            if (chunkData != null) {
-+                chunkData.blockEntitiesData.removeIf(blockEntity -> blockEntity.type == BlockEntityType.MOB_SPAWNER);
++                chunkData.blockEntitiesData.removeIf(blockEntity -> blockEntity.type == BlockEntityTypes.MOB_SPAWNER);
 +            }
 +
-+            if (packet instanceof final ClientboundBlockEntityDataPacket bedPacket && bedPacket.getType() == BlockEntityType.MOB_SPAWNER) {
++            if (packet instanceof final ClientboundBlockEntityDataPacket bedPacket && bedPacket.getType() == BlockEntityTypes.MOB_SPAWNER) {
 +                return true;
 +            }
 +        }
@@ -325,7 +328,7 @@ index 0000000000000000000000000000000000000000..5239478c397169f82206fcaefb77f71d
 +}
 diff --git a/me/samsuik/sakura/player/visibility/VisibilityGui.java b/me/samsuik/sakura/player/visibility/VisibilityGui.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..3dca28b1533d128e87ea01f7baa558875db5afd5
+index 0000000000000000000000000000000000000000..84184ec247b1a2268a935f58f7ffd6440d35859c
 --- /dev/null
 +++ b/me/samsuik/sakura/player/visibility/VisibilityGui.java
 @@ -0,0 +1,100 @@
@@ -381,7 +384,7 @@ index 0000000000000000000000000000000000000000..3dca28b1533d128e87ea01f7baa55887
 +        final IntArrayFIFOQueue slots = this.availableSlots();
 +        this.updateToggleButton(settings, player, inventory);
 +
-+        for (final VisibilityType type : VisibilityTypes.types()) {
++        for (final VisibilityType type : VisibilityGuiItems.BUTTON_ORDER) {
 +            final VisibilityState state = settings.get(type);
 +            final int index = type.states().indexOf(state);
 +            final int slot = slots.dequeueInt();
@@ -420,7 +423,7 @@ index 0000000000000000000000000000000000000000..3dca28b1533d128e87ea01f7baa55887
 +        final IntArrayFIFOQueue slots = new IntArrayFIFOQueue();
 +        for (int row = 1; row < 4; ++row) {
 +            for (int column = 3; column < 6; ++column) {
-+                if (row == 1 || (column + row) % 2 == 0) {
++                if ((row % 2) == 1 || (column + row) % 2 == 0) {
 +                    slots.enqueue((row * 9) + column);
 +                }
 +            }
@@ -431,12 +434,13 @@ index 0000000000000000000000000000000000000000..3dca28b1533d128e87ea01f7baa55887
 +}
 diff --git a/me/samsuik/sakura/player/visibility/VisibilityGuiItems.java b/me/samsuik/sakura/player/visibility/VisibilityGuiItems.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..6fdea0a5d22b5656fa79257074b0abab4808db8b
+index 0000000000000000000000000000000000000000..6dafd5095629ced8ef2ef9fffbf135ac7de85839
 --- /dev/null
 +++ b/me/samsuik/sakura/player/visibility/VisibilityGuiItems.java
-@@ -0,0 +1,55 @@
+@@ -0,0 +1,69 @@
 +package me.samsuik.sakura.player.visibility;
 +
++import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 +import it.unimi.dsi.fastutil.objects.ObjectImmutableList;
 +import it.unimi.dsi.fastutil.objects.Reference2ObjectMap;
 +import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
@@ -448,21 +452,34 @@ index 0000000000000000000000000000000000000000..6fdea0a5d22b5656fa79257074b0abab
 +import org.bukkit.inventory.ItemStack;
 +import org.jspecify.annotations.NullMarked;
 +
++import java.util.List;
 +import java.util.Locale;
 +
 +@NullMarked
 +public final class VisibilityGuiItems {
 +    static final Reference2ObjectMap<VisibilityType, ObjectImmutableList<ItemStack>> GUI_ITEMS = new Reference2ObjectOpenHashMap<>();
 +    static final Reference2ObjectMap<VisibilityState, ItemStack> TOGGLE_BUTTON_ITEMS = new Reference2ObjectOpenHashMap<>();
++    static final List<VisibilityType> BUTTON_ORDER = new ObjectArrayList<>();
 +
 +    static {
 +        final Reference2ObjectMap<VisibilityType, ItemStack> items = new Reference2ObjectOpenHashMap<>();
 +        items.put(VisibilityTypes.TNT, ItemStackUtil.itemWithName(Material.TNT, Component.text("Tnt", NamedTextColor.RED)));
 +        items.put(VisibilityTypes.WIND_CHARGE, ItemStackUtil.itemWithName(Material.WIND_CHARGE, Component.text("Wind Charge", NamedTextColor.GRAY)));
 +        items.put(VisibilityTypes.SAND, ItemStackUtil.itemWithName(Material.SAND, Component.text("Sand", NamedTextColor.YELLOW)));
++        items.put(VisibilityTypes.SULFUR_CUBE, ItemStackUtil.itemWithName(Material.SULFUR_BRICKS, Component.text("Sulfur Cube", NamedTextColor.YELLOW)));
 +        items.put(VisibilityTypes.EXPLOSIONS, ItemStackUtil.itemWithName(Material.COBWEB, Component.text("Explosions", NamedTextColor.WHITE)));
 +        items.put(VisibilityTypes.SPAWNERS, ItemStackUtil.itemWithName(Material.SPAWNER, Component.text("Spawners", NamedTextColor.DARK_GRAY)));
 +        items.put(VisibilityTypes.PISTONS, ItemStackUtil.itemWithName(Material.PISTON, Component.text("Pistons", NamedTextColor.GOLD)));
++
++        BUTTON_ORDER.addAll(List.of(
++            VisibilityTypes.TNT,
++            VisibilityTypes.WIND_CHARGE,
++            VisibilityTypes.SAND,
++            VisibilityTypes.SULFUR_CUBE,
++            VisibilityTypes.PISTONS,
++            VisibilityTypes.EXPLOSIONS,
++            VisibilityTypes.SPAWNERS
++        ));
 +
 +        for (final VisibilityType type : VisibilityTypes.types()) {
 +            final ItemStack item = items.get(type);
@@ -491,7 +508,7 @@ index 0000000000000000000000000000000000000000..6fdea0a5d22b5656fa79257074b0abab
 +    }
 +}
 diff --git a/net/minecraft/network/protocol/game/ClientboundLevelChunkPacketData.java b/net/minecraft/network/protocol/game/ClientboundLevelChunkPacketData.java
-index 42bfd4b3b626ef66b0f2ef8438add5342b367800..1125b25fe9dd130f4666ea37245acdb9ae1f2004 100644
+index a52f93d0563f713b1d2b707cdb6ab74e4793a54d..98e2b8f98c95d61b497c6fbe20b64c24852aaa95 100644
 --- a/net/minecraft/network/protocol/game/ClientboundLevelChunkPacketData.java
 +++ b/net/minecraft/network/protocol/game/ClientboundLevelChunkPacketData.java
 @@ -31,7 +31,7 @@ public class ClientboundLevelChunkPacketData {
@@ -522,10 +539,10 @@ index 42bfd4b3b626ef66b0f2ef8438add5342b367800..1125b25fe9dd130f4666ea37245acdb9
  
          private BlockEntityInfo(final int packedXZ, final int y, final BlockEntityType<?> type, final @Nullable CompoundTag tag) {
 diff --git a/net/minecraft/server/level/ChunkMap.java b/net/minecraft/server/level/ChunkMap.java
-index b1a81e0a6b3d0cde7f7bf67a4c542abc5f1392d4..87441a0345943ec843e55505f859b456765c8aab 100644
+index 6e150beab056aefa785a5a8f0c89fe14c3bdb9a8..555c7c0b4feda269c96a227d4bf49913b0ca8a63 100644
 --- a/net/minecraft/server/level/ChunkMap.java
 +++ b/net/minecraft/server/level/ChunkMap.java
-@@ -1382,6 +1382,7 @@ public class ChunkMap extends SimpleRegionStorage implements ChunkHolder.PlayerP
+@@ -1381,6 +1381,7 @@ public class ChunkMap extends SimpleRegionStorage implements ChunkHolder.PlayerP
                      && this.entity.broadcastToPlayer(player)
                      && ChunkMap.this.isChunkTracked(player, this.entity.chunkPosition().x(), this.entity.chunkPosition().z());
                  // Paper end - Configurable entity tracking range by Y
@@ -534,10 +551,10 @@ index b1a81e0a6b3d0cde7f7bf67a4c542abc5f1392d4..87441a0345943ec843e55505f859b456
                  if (visibleToPlayer && !player.getBukkitEntity().canSee(this.entity.getBukkitEntity())) { // Paper - only consider hits
                      visibleToPlayer = false;
 diff --git a/net/minecraft/server/level/ServerLevel.java b/net/minecraft/server/level/ServerLevel.java
-index a500f1996450dec527afc45b0ac9d9d01f8d8649..12ac1f38277c16d302efb3960eb3e5ad7f62da96 100644
+index 1ee9a2e807fa165cfbb41a39b6ca5114e88521d8..78bb2de647b30329d848e1b61b3800b5fb493ad6 100644
 --- a/net/minecraft/server/level/ServerLevel.java
 +++ b/net/minecraft/server/level/ServerLevel.java
-@@ -2087,6 +2087,24 @@ public class ServerLevel extends Level implements WorldGenLevel, ServerEntityGet
+@@ -2098,6 +2098,24 @@ public class ServerLevel extends Level implements WorldGenLevel, ServerEntityGet
          for (ServerPlayer player : this.players) {
              if (player.distanceToSqr(center) < 4096.0) {
                  Optional<Vec3> playerKnockback = Optional.ofNullable(explosion.getHitPlayers().get(player));
@@ -563,10 +580,10 @@ index a500f1996450dec527afc45b0ac9d9d01f8d8649..12ac1f38277c16d302efb3960eb3e5ad
              }
          }
 diff --git a/net/minecraft/server/level/ServerPlayer.java b/net/minecraft/server/level/ServerPlayer.java
-index 9468f474217ed3b27328c8c43fe2c450f582ae73..91fe99ba5a4f0fb4092ad1f5589ead2516e4ad4a 100644
+index fc9cd52dfaf1a9645e875ce128d7be299bcd4ee7..25a710844c7aeeeb60e310c76a724ff135b94de0 100644
 --- a/net/minecraft/server/level/ServerPlayer.java
 +++ b/net/minecraft/server/level/ServerPlayer.java
-@@ -488,6 +488,7 @@ public class ServerPlayer extends Player implements ca.spottedleaf.moonrise.patc
+@@ -475,6 +475,7 @@ public class ServerPlayer extends Player implements ca.spottedleaf.moonrise.patc
      }
      // Paper end - rewrite chunk system
      public double trackingRangeModifier = 1.0; // Sakura - entity tracking range modifier api
@@ -575,7 +592,7 @@ index 9468f474217ed3b27328c8c43fe2c450f582ae73..91fe99ba5a4f0fb4092ad1f5589ead25
      public ServerPlayer(final MinecraftServer server, final ServerLevel level, final GameProfile gameProfile, final ClientInformation clientInformation) {
          super(level, gameProfile);
 diff --git a/net/minecraft/server/network/ServerCommonPacketListenerImpl.java b/net/minecraft/server/network/ServerCommonPacketListenerImpl.java
-index 42071e248d9d5c5a53d0807f8aa9dbf23fec77c5..c9b9fce3578bc61d641379a6f7311020424f7546 100644
+index 115f3fa2e938e3aab2584e0932f4412755358d5f..242cc5e2a4a42af85d804356b9e7811b152175e4 100644
 --- a/net/minecraft/server/network/ServerCommonPacketListenerImpl.java
 +++ b/net/minecraft/server/network/ServerCommonPacketListenerImpl.java
 @@ -351,6 +351,17 @@ public abstract class ServerCommonPacketListenerImpl implements ServerCommonPack
@@ -597,10 +614,10 @@ index 42071e248d9d5c5a53d0807f8aa9dbf23fec77c5..c9b9fce3578bc61d641379a6f7311020
          if (packet.isTerminal()) {
              this.close();
 diff --git a/net/minecraft/world/level/Level.java b/net/minecraft/world/level/Level.java
-index 24958ecab42cb3005f01678ac27a1e1ac8d0d864..ab82372793a06938bedb8bf88230cee1257fce56 100644
+index 986c54037ffa9829ea6c457aae102725fc627158..1b58f77e481548646015af4a2962f8c79571f90f 100644
 --- a/net/minecraft/world/level/Level.java
 +++ b/net/minecraft/world/level/Level.java
-@@ -887,6 +887,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable, ca.spottedl
+@@ -888,6 +888,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable, ca.spottedl
          return this.blockStateRevisionCounter.get();
      }
      // Sakura end - implement state watchers and tick scheduler

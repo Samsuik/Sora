@@ -5,10 +5,10 @@ Subject: [PATCH] Configurable left shooting and adjusting limits
 
 
 diff --git a/net/minecraft/world/entity/Entity.java b/net/minecraft/world/entity/Entity.java
-index 7677749a61b08a596d42915999b75c951edad1b3..98ec3bf69110f29cdb79b24f83caf6aeffd9396e 100644
+index 5cf7bd089460aaf59ade9f9a64b28eadcc544158..0187f77efa390b27817edb1adb01f7fd743ed159 100644
 --- a/net/minecraft/world/entity/Entity.java
 +++ b/net/minecraft/world/entity/Entity.java
-@@ -186,6 +186,47 @@ public abstract class Entity
+@@ -183,6 +183,47 @@ public abstract class Entity
          return Math.max(x, z) >= this.travelDistanceLimit;
      }
      // Sakura end - entity travel distance limits
@@ -56,7 +56,7 @@ index 7677749a61b08a596d42915999b75c951edad1b3..98ec3bf69110f29cdb79b24f83caf6ae
  
      // Paper start - Share random for entities to make them more random
      public static RandomSource SHARED_RANDOM = new RandomRandomSource();
-@@ -1727,6 +1768,7 @@ public abstract class Entity
+@@ -1792,6 +1833,7 @@ public abstract class Entity
          }
  
          if (xSmaller && z != 0.0) {
@@ -64,7 +64,7 @@ index 7677749a61b08a596d42915999b75c951edad1b3..98ec3bf69110f29cdb79b24f83caf6ae
              z = this.scanZ(currentBox, z, collisionsVoxel, collisionsBB);
              if (z != 0.0) {
                  currentBox = ca.spottedleaf.moonrise.patches.collisions.CollisionUtil.offsetZ(currentBox, z);
-@@ -1734,6 +1776,11 @@ public abstract class Entity
+@@ -1799,6 +1841,11 @@ public abstract class Entity
          }
  
          if (x != 0.0) {
@@ -77,10 +77,10 @@ index 7677749a61b08a596d42915999b75c951edad1b3..98ec3bf69110f29cdb79b24f83caf6ae
              if (x != 0.0) {
                  currentBox = ca.spottedleaf.moonrise.patches.collisions.CollisionUtil.offsetX(currentBox, x);
 diff --git a/net/minecraft/world/entity/item/FallingBlockEntity.java b/net/minecraft/world/entity/item/FallingBlockEntity.java
-index 613dd905cb86be92ac8de285099c00748671fee0..bb97efcf2321d7f9cb70e95aae5f032cc1fcfc45 100644
+index 5aae285787a775445cc67021c3c0dc86cddc29df..e86a30a196589d2d696d8374fb8b2021d0e647c7 100644
 --- a/net/minecraft/world/entity/item/FallingBlockEntity.java
 +++ b/net/minecraft/world/entity/item/FallingBlockEntity.java
-@@ -274,6 +274,7 @@ public class FallingBlockEntity extends Entity implements me.samsuik.sakura.enti
+@@ -278,6 +278,7 @@ public class FallingBlockEntity extends Entity implements me.samsuik.sakura.enti
              // Sakura end - configure server mechanics
              this.time++;
              this.applyGravity();

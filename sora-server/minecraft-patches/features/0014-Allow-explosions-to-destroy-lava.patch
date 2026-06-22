@@ -5,7 +5,7 @@ Subject: [PATCH] Allow explosions to destroy lava
 
 
 diff --git a/net/minecraft/world/level/ServerExplosion.java b/net/minecraft/world/level/ServerExplosion.java
-index d250fc0cd523b151424ef0eb8ddf0ee42455896b..137d733277d3f87256b9c06973fa5ce747f10292 100644
+index ecb286ec18b998377a1973192c4a8e482085ad05..e4a8b0cd460734d44e9d9389ee2e592e54a5a4c6 100644
 --- a/net/minecraft/world/level/ServerExplosion.java
 +++ b/net/minecraft/world/level/ServerExplosion.java
 @@ -382,6 +382,11 @@ public class ServerExplosion implements Explosion {
@@ -21,10 +21,10 @@ index d250fc0cd523b151424ef0eb8ddf0ee42455896b..137d733277d3f87256b9c06973fa5ce7
  
          return this.damageCalculator.getBlockExplosionResistance(this, this.level, pos, blockState, fluidState);
 diff --git a/net/minecraft/world/level/block/state/BlockBehaviour.java b/net/minecraft/world/level/block/state/BlockBehaviour.java
-index 1003870bab970d708936181679cc41bb2d575186..bebd38d386bcc2c737d1d20828aeacc01994cdf6 100644
+index 720e6c9669ae0ca9fed7ff62de20f18203e2338b..8eb15b39726c175c5e5ef1b301afafbb97f44a85 100644
 --- a/net/minecraft/world/level/block/state/BlockBehaviour.java
 +++ b/net/minecraft/world/level/block/state/BlockBehaviour.java
-@@ -205,7 +205,7 @@ public abstract class BlockBehaviour implements FeatureElement {
+@@ -203,7 +203,7 @@ public abstract class BlockBehaviour implements FeatureElement {
                  state.getDrops(params).forEach(stack -> onHit.accept(stack, pos));
              }
  

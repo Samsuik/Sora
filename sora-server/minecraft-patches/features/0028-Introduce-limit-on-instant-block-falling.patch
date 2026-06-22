@@ -16,10 +16,10 @@ index fe1294fa83e1a3c42cbbd762d531b18b2a8cfe89..92b01f8941aec04a3c2cef369d7e6c1e
      }
  }
 diff --git a/net/minecraft/world/entity/item/FallingBlockEntity.java b/net/minecraft/world/entity/item/FallingBlockEntity.java
-index bb97efcf2321d7f9cb70e95aae5f032cc1fcfc45..64d159bbaca630d75993488e26ae070663e48324 100644
+index e86a30a196589d2d696d8374fb8b2021d0e647c7..c264cd3da0a9537acb4ab6e08cb2222091eee709 100644
 --- a/net/minecraft/world/entity/item/FallingBlockEntity.java
 +++ b/net/minecraft/world/entity/item/FallingBlockEntity.java
-@@ -209,6 +209,13 @@ public class FallingBlockEntity extends Entity implements me.samsuik.sakura.enti
+@@ -213,6 +213,13 @@ public class FallingBlockEntity extends Entity implements me.samsuik.sakura.enti
              state.hasProperty(BlockStateProperties.WATERLOGGED) ? state.setValue(BlockStateProperties.WATERLOGGED, false) : state
          );
          if (!org.bukkit.craftbukkit.event.CraftEventFactory.callEntityChangeBlockEvent(entity, pos, state.getFluidState().createLegacyBlock())) return entity; // CraftBukkit
@@ -34,10 +34,10 @@ index bb97efcf2321d7f9cb70e95aae5f032cc1fcfc45..64d159bbaca630d75993488e26ae0706
          if (entity.mechanicsTarget().atLeast(me.samsuik.sakura.mechanics.MechanicVersion.v1_18_2)) {
              level.setBlock(pos, state.getFluidState().createLegacyBlock(), Block.UPDATE_ALL);
 diff --git a/net/minecraft/world/level/Level.java b/net/minecraft/world/level/Level.java
-index 04b97f6701fd5d6aa83be8554ccde4cb3db747e4..2d6c29f3322711d367c9884834b1958de4e4c604 100644
+index ea7e1ae0a00e9a725e4a076b9d18e3bc317c13e3..8d2b41cc27da26fee2e858208608520811634520 100644
 --- a/net/minecraft/world/level/Level.java
 +++ b/net/minecraft/world/level/Level.java
-@@ -898,6 +898,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable, ca.spottedl
+@@ -899,6 +899,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable, ca.spottedl
      public final me.samsuik.sakura.mechanics.sake.DispenseRelocationHandler dispenseRelocationHandler = new me.samsuik.sakura.mechanics.sake.DispenseRelocationHandler(this); // Sakura - configure server mechanics
      public final me.samsuik.sakura.explosion.DurableBlockManager durabilityManager = new me.samsuik.sakura.explosion.DurableBlockManager(); // Sakura - explosion durable blocks
      public final me.samsuik.sakura.redstone.RedstoneWireCache redstoneWireCache = new me.samsuik.sakura.redstone.RedstoneWireCache(); // Sakura - cache vanilla and eigencraft wires

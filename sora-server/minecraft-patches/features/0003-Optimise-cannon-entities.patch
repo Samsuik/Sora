@@ -201,7 +201,7 @@ index 0000000000000000000000000000000000000000..4899d29bb588d1d20a59339466ad625f
 +}
 diff --git a/me/samsuik/sakura/entity/SakuraEntity.java b/me/samsuik/sakura/entity/SakuraEntity.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..4ec0430c1bfd78a4446705c6e9f2885b62d72c35
+index 0000000000000000000000000000000000000000..e120ec149a5811fee0b3bf0986d16924c893df1d
 --- /dev/null
 +++ b/me/samsuik/sakura/entity/SakuraEntity.java
 @@ -0,0 +1,34 @@
@@ -218,7 +218,7 @@ index 0000000000000000000000000000000000000000..4ec0430c1bfd78a4446705c6e9f2885b
 +        return (Entity) this;
 +    }
 +
-+    default boolean canLink(final Entity otherEntity) {
++    default boolean canLink(final Entity otherEntity, final int tickDifference) {
 +        return true;
 +    }
 +
@@ -241,10 +241,10 @@ index 0000000000000000000000000000000000000000..4ec0430c1bfd78a4446705c6e9f2885b
 +}
 diff --git a/me/samsuik/sakura/entity/SakuraEntityController.java b/me/samsuik/sakura/entity/SakuraEntityController.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..3b807d15597096d140cd2c42f9430d84a3f26fdf
+index 0000000000000000000000000000000000000000..78bf1eab8c4f5dfd411d5b570538155a1e76a1ad
 --- /dev/null
 +++ b/me/samsuik/sakura/entity/SakuraEntityController.java
-@@ -0,0 +1,242 @@
+@@ -0,0 +1,256 @@
 +package me.samsuik.sakura.entity;
 +
 +import ca.spottedleaf.moonrise.patches.chunk_system.level.entity.ChunkEntitySlices;
@@ -254,7 +254,7 @@ index 0000000000000000000000000000000000000000..3b807d15597096d140cd2c42f9430d84
 +import me.samsuik.sakura.entity.merge.MergeLevel;
 +import net.minecraft.server.level.ServerLevel;
 +import net.minecraft.world.entity.Entity;
-+import net.minecraft.world.entity.EntityType;
++import net.minecraft.world.entity.EntityTypes;
 +import net.minecraft.world.level.Level;
 +import org.jspecify.annotations.NullMarked;
 +import org.jspecify.annotations.Nullable;
@@ -367,20 +367,27 @@ index 0000000000000000000000000000000000000000..3b807d15597096d140cd2c42f9430d84
 +            return false;
 +        }
 +
-+        final boolean isFallingBlock = entity.getType() == EntityType.FALLING_BLOCK;
++        final boolean isFallingBlock = entity.getType() == EntityTypes.FALLING_BLOCK;
 +        return entityData.hasLinkedInThePast(otherSakuraEntity, isFallingBlock ? 100 : 0);
 +    }
 +
-+    private boolean canLinkWith(final SakuraEntity sakuraEntity, final SakuraEntity otherSakuraEntity) {
++    private boolean canLinkWith(
++        final SakuraEntity sakuraEntity,
++        final SakuraEntity otherSakuraEntity,
++        final SakuraEntityController otherController
++    ) {
++        final SakuraEntityController tailController = otherController.links.getTail();
++        final Entity tailEntity = tailController.sakuraEntity.asEntity();
 +        final Entity otherEntity = otherSakuraEntity.asEntity();
 +        final Entity entity = this.entity;
++
 +        return entity.getType() == otherEntity.getType()
 +            && entity.isAlive()
 +            && otherEntity.isAlive()
 +            && otherEntity.getId() < entity.getId()
 +            && entity.moonrise$getSectionY() != Integer.MIN_VALUE
 +            && this.isFullyAwake()
-+            && sakuraEntity.canLink(otherEntity);
++            && sakuraEntity.canLink(tailEntity, tailController.sleepTicks());
 +    }
 +
 +    private boolean attemptToLinkEntities(
@@ -397,10 +404,13 @@ index 0000000000000000000000000000000000000000..3b807d15597096d140cd2c42f9430d84
 +            mergeLevel
 +        );
 +
-+        if (otherSakuraEntity != null && this.canLinkWith(sakuraEntity, otherSakuraEntity)) {
-+            otherSakuraEntity.getSakuraEntityController().links.link(this, this.links);
-+            this.setSleeping(true);
-+            return true;
++        if (otherSakuraEntity != null) {
++            final SakuraEntityController otherController = otherSakuraEntity.getSakuraEntityController();
++            if (this.canLinkWith(sakuraEntity, otherSakuraEntity, otherController)) {
++                otherController.links.link(this, this.links);
++                this.setSleeping(true);
++                return true;
++            }
 +        }
 +
 +        return false;
@@ -448,6 +458,10 @@ index 0000000000000000000000000000000000000000..3b807d15597096d140cd2c42f9430d84
 +        if (tail == this) {
 +            this.manager.updateTickingStatus(links, false);
 +        }
++    }
++
++    public int sleepTicks() {
++        return this.isSleeping() ? this.sleepTimer - Integer.MIN_VALUE : 0;
 +    }
 +
 +    public boolean isFullyAwake() {
@@ -771,10 +785,10 @@ index 0000000000000000000000000000000000000000..86c24fd87be41aaa9c3073997ba8e3bc
 +    }
 +}
 diff --git a/net/minecraft/server/level/ServerLevel.java b/net/minecraft/server/level/ServerLevel.java
-index 3e52a3417f4666de1b55de42204d814d521bf90a..4ab4941c404107905bfb03fda6bae9e9f9eb254e 100644
+index 78bb2de647b30329d848e1b61b3800b5fb493ad6..f8c6672483395f8195e967a0700aceba1daaf4bd 100644
 --- a/net/minecraft/server/level/ServerLevel.java
 +++ b/net/minecraft/server/level/ServerLevel.java
-@@ -1463,10 +1463,17 @@ public class ServerLevel extends Level implements WorldGenLevel, ServerEntityGet
+@@ -1474,10 +1474,17 @@ public class ServerLevel extends Level implements WorldGenLevel, ServerEntityGet
          profiler.push(entity.typeHolder()::getRegisteredName);
          profiler.incrementCounter("tickNonPassenger");
          final boolean isActive = io.papermc.paper.entity.activation.ActivationRange.checkIfActive(entity); // Paper - EAR 2
@@ -796,7 +810,7 @@ index 3e52a3417f4666de1b55de42204d814d521bf90a..4ab4941c404107905bfb03fda6bae9e9
          profiler.pop();
  
          for (Entity passenger : entity.getPassengers()) {
-@@ -2076,6 +2083,7 @@ public class ServerLevel extends Level implements WorldGenLevel, ServerEntityGet
+@@ -2087,6 +2094,7 @@ public class ServerLevel extends Level implements WorldGenLevel, ServerEntityGet
          Vec3 center = new Vec3(x, y, z);
          ServerExplosion explosion = new ServerExplosion(this, source, damageSource, damageCalculator, center, r, fire, blockInteraction);
          if (configurator != null) configurator.accept(explosion); // Paper - Allow explosions to damage source
@@ -805,7 +819,7 @@ index 3e52a3417f4666de1b55de42204d814d521bf90a..4ab4941c404107905bfb03fda6bae9e9
          // CraftBukkit start
          if (explosion.wasCanceled) {
 diff --git a/net/minecraft/world/entity/Entity.java b/net/minecraft/world/entity/Entity.java
-index c5223eae52786294adfd85dc8477ca2907ba1b75..effddfbe9332caee6b8802cebc0beeec78907c82 100644
+index 7d9859bff1d4317ed757931f355d0d9bcfcb009f..6dfb20a20631175951231be321dccc925a83eea4 100644
 --- a/net/minecraft/world/entity/Entity.java
 +++ b/net/minecraft/world/entity/Entity.java
 @@ -553,6 +553,15 @@ public abstract class Entity
@@ -824,7 +838,7 @@ index c5223eae52786294adfd85dc8477ca2907ba1b75..effddfbe9332caee6b8802cebc0beeec
  
      // Purpur start - Add canSaveToDisk to Entity
      public boolean canSaveToDisk() {
-@@ -5192,6 +5201,12 @@ public abstract class Entity
+@@ -5269,6 +5278,12 @@ public abstract class Entity
              this.stopRiding();
          }
  
@@ -838,10 +852,10 @@ index c5223eae52786294adfd85dc8477ca2907ba1b75..effddfbe9332caee6b8802cebc0beeec
          this.levelCallback.onRemove(reason);
          this.onRemoval(reason);
 diff --git a/net/minecraft/world/entity/item/FallingBlockEntity.java b/net/minecraft/world/entity/item/FallingBlockEntity.java
-index a8f0d360e3117414138cca7186e76f8f1968df81..a4f5d280cfeb0af482b96ce993a9b2c7a262a15b 100644
+index 637d811325bd4c2614281a7b087636db9270e537..a6d9e875afae199a96a548a43d8a544526d0a27a 100644
 --- a/net/minecraft/world/entity/item/FallingBlockEntity.java
 +++ b/net/minecraft/world/entity/item/FallingBlockEntity.java
-@@ -53,7 +53,7 @@ import net.minecraft.world.phys.Vec3;
+@@ -54,7 +54,7 @@ import net.minecraft.world.phys.Vec3;
  import org.jspecify.annotations.Nullable;
  import org.slf4j.Logger;
  
@@ -850,7 +864,7 @@ index a8f0d360e3117414138cca7186e76f8f1968df81..a4f5d280cfeb0af482b96ce993a9b2c7
      private static final Logger LOGGER = LogUtils.getLogger();
      private static final BlockState DEFAULT_BLOCK_STATE = Blocks.SAND.defaultBlockState();
      private static final int DEFAULT_TIME = 0;
-@@ -101,12 +101,61 @@ public class FallingBlockEntity extends Entity {
+@@ -102,12 +102,64 @@ public class FallingBlockEntity extends Entity {
          return BlockPos.containing(this.getX(), this.getY() + 1.0e-12, this.getZ());
      }
      // Sakura end - fix falling block floating point errors
@@ -867,8 +881,12 @@ index a8f0d360e3117414138cca7186e76f8f1968df81..a4f5d280cfeb0af482b96ce993a9b2c7
 +    }
 +
 +    @Override
-+    public final boolean canLink(final Entity entity) {
++    public final boolean canLink(final Entity entity, final int tickDifference) {
 +        if (!(entity instanceof final FallingBlockEntity otherFallingBlock)) {
++            return false;
++        }
++
++        if (this.heightParity != otherFallingBlock.heightParity) {
 +            return false;
 +        }
 +
@@ -883,8 +901,7 @@ index a8f0d360e3117414138cca7186e76f8f1968df81..a4f5d280cfeb0af482b96ce993a9b2c7
 +    public final boolean sameProperties(final Entity otherEntity, final int tickDifference) {
 +        return otherEntity instanceof final FallingBlockEntity otherFallingBlockEntity
 +            && this.time + tickDifference == otherFallingBlockEntity.time
-+            && this.blockState == otherFallingBlockEntity.blockState
-+            && this.heightParity == otherFallingBlockEntity.heightParity;
++            && this.blockState == otherFallingBlockEntity.blockState;
 +    }
 +
 +    @Override
@@ -913,10 +930,10 @@ index a8f0d360e3117414138cca7186e76f8f1968df81..a4f5d280cfeb0af482b96ce993a9b2c7
  
      public FallingBlockEntity(final Level level, final double x, final double y, final double z, final BlockState blockState) {
 diff --git a/net/minecraft/world/entity/item/PrimedTnt.java b/net/minecraft/world/entity/item/PrimedTnt.java
-index feb825359ef74d4ab88554af33c7f8291787051a..f744e19ffc8c58fd2d2df29695f836f0efef21b5 100644
+index d03c9a77e5827bbe584d42ad94f50a9ca379bb67..c8832c7a9c5651158f71937d56109a298e880f94 100644
 --- a/net/minecraft/world/entity/item/PrimedTnt.java
 +++ b/net/minecraft/world/entity/item/PrimedTnt.java
-@@ -34,7 +34,7 @@ import org.bukkit.event.entity.EntityRemoveEvent;
+@@ -36,7 +36,7 @@ import org.bukkit.event.entity.EntityRemoveEvent;
  import org.bukkit.event.entity.ExplosionPrimeEvent;
  // CraftBukkit end
  
@@ -924,8 +941,8 @@ index feb825359ef74d4ab88554af33c7f8291787051a..f744e19ffc8c58fd2d2df29695f836f0
 +public class PrimedTnt extends Entity implements TraceableEntity, me.samsuik.sakura.entity.SakuraEntity { // Sakura - optimise cannon entities
      private static final EntityDataAccessor<Integer> DATA_FUSE_ID = SynchedEntityData.defineId(PrimedTnt.class, EntityDataSerializers.INT);
      private static final EntityDataAccessor<BlockState> DATA_BLOCK_STATE_ID = SynchedEntityData.defineId(PrimedTnt.class, EntityDataSerializers.BLOCK_STATE);
-     private static final short DEFAULT_FUSE_TIME = 80;
-@@ -61,10 +61,43 @@ public class PrimedTnt extends Entity implements TraceableEntity {
+     public static final short DEFAULT_FUSE_TIME = 80;
+@@ -64,10 +64,49 @@ public class PrimedTnt extends Entity implements TraceableEntity {
      public float explosionPower = 4.0F;
      public boolean isIncendiary = false; // CraftBukkit
  
@@ -938,11 +955,17 @@ index feb825359ef74d4ab88554af33c7f8291787051a..f744e19ffc8c58fd2d2df29695f836f0
 +    }
 +
 +    @Override
++    public final boolean canLink(final Entity otherEntity, final int tickDifference) {
++        return otherEntity instanceof final PrimedTnt otherTnt
++            && otherTnt.getFuse() < this.getFuse() + tickDifference
++            && this.explosionPower == otherTnt.explosionPower
++            && this.isIncendiary == otherTnt.isIncendiary;
++    }
++
++    @Override
 +    public final boolean sameProperties(final Entity otherEntity, final int tickDifference) {
-+        return otherEntity instanceof final PrimedTnt otherTntEntity
-+            && this.getFuse() - tickDifference == otherTntEntity.getFuse()
-+            && this.explosionPower == otherTntEntity.explosionPower
-+            && this.isIncendiary == otherTntEntity.isIncendiary;
++        return otherEntity instanceof final PrimedTnt otherTnt
++            && this.getFuse() - tickDifference == otherTnt.getFuse();
 +    }
 +
 +    @Override
@@ -969,8 +992,99 @@ index feb825359ef74d4ab88554af33c7f8291787051a..f744e19ffc8c58fd2d2df29695f836f0
      }
  
      public PrimedTnt(final Level level, final double x, final double y, final double z, final @Nullable LivingEntity owner) {
+diff --git a/net/minecraft/world/entity/monster/cubemob/SulfurCube.java b/net/minecraft/world/entity/monster/cubemob/SulfurCube.java
+index 0bd3fe1dfdf1f6fb0845ab21e0455682b375c483..6cb859f8227342c1a0007cec8fa04a46de029271 100644
+--- a/net/minecraft/world/entity/monster/cubemob/SulfurCube.java
++++ b/net/minecraft/world/entity/monster/cubemob/SulfurCube.java
+@@ -77,7 +77,7 @@ import net.minecraft.world.phys.Vec2;
+ import net.minecraft.world.phys.Vec3;
+ import org.jspecify.annotations.Nullable;
+ 
+-public class SulfurCube extends AbstractCubeMob implements Bucketable, Shearable {
++public class SulfurCube extends AbstractCubeMob implements Bucketable, Shearable, me.samsuik.sakura.entity.SakuraEntity { // Sakura - optimise cannon entities
+     public static final int SPLIT_COUNT = 2;
+     public static final int MAX_SIZE = 2;
+     public static final int MIN_SIZE = 1;
+@@ -104,10 +104,53 @@ public class SulfurCube extends AbstractCubeMob implements Bucketable, Shearable
+     private static final float EXTRA_KNOCKBACK_DAMPENING = 0.25F;
+     private static final Predicate<ItemEntity> ALLOWED_ITEMS = e -> !e.hasPickUpDelay() && e.isAlive() && isSwallowableItem(e.getItem());
+ 
++    // Sakura start - optimise cannon entities
++    private final me.samsuik.sakura.entity.SakuraEntityController sakuraEntityController;
++    private final java.util.Set<SulfurCubeArchetype> activeArchetypes = new java.util.HashSet<>();
++
++    @Override
++    public final me.samsuik.sakura.entity.SakuraEntityController getSakuraEntityController() {
++        return this.sakuraEntityController;
++    }
++
++    @Override
++    public final boolean canLink(final Entity otherEntity, final int tickDifference) {
++        return otherEntity instanceof final SulfurCube otherCube
++            && this.hasBodyItem()
++            && this.explosionData.isPresent()
++            && otherCube.isPrimed()
++            && this.isPrimed()
++            && otherCube.getFuse() < this.getFuse() + tickDifference
++            && this.activeArchetypes.equals(otherCube.activeArchetypes);
++    }
++
++    @Override
++    public final boolean sameProperties(final Entity otherEntity, final int tickDifference) {
++        return otherEntity instanceof final SulfurCube otherCube
++            && this.getFuse() - tickDifference == otherCube.getFuse();
++    }
++
++    @Override
++    public final void catchupOnTicks(final int ticks) {
++        this.setFuse(this.getFuse() - ticks);
++    }
++
++    @Override
++    public final net.minecraft.world.phys.Vec3 sakura$position() {
++        return this.sakuraEntityController.getLinks().getHead().entity.position();
++    }
++
++    @Override
++    public final net.minecraft.world.phys.Vec3 sakura$deltaMovement() {
++        return this.sakuraEntityController.getLinks().getHead().entity.getDeltaMovement();
++    }
++    // Sakura end - optimise cannon entities
++
+     public SulfurCube(final EntityType<? extends SulfurCube> type, final Level level) {
+         super(type, level);
+         this.lookControl = new SulfurCube.SulfurCubeLookControl();
+         this.moveControl = new SulfurCube.SulfurCubeMobMoveControl<>(this);
++        this.sakuraEntityController = level.sakuraEntityManager.createController(this); // Sakura - optimise cannon entities
+     }
+ 
+     @Override
+@@ -469,7 +512,14 @@ public class SulfurCube extends AbstractCubeMob implements Bucketable, Shearable
+             this.soundSettings = SulfurCubeArchetype.DEFAULT_SOUND_SETTINGS;
+             this.cannonEntity = false; // Sakura - add cannon entity field
+ 
+-            for (SulfurCubeArchetype archetype : this.matchingArchetypes(current)) {
++            // Sakura start - optimise cannon entities
++            final List<SulfurCubeArchetype> matchingArchetypes = this.matchingArchetypes(current);
++            this.activeArchetypes.clear();
++            this.activeArchetypes.addAll(matchingArchetypes);
++            this.sakuraEntityController.decouple();
++
++            for (SulfurCubeArchetype archetype : matchingArchetypes) {
++                // Sakura end - optimise cannon entities
+                 if (archetype.buoyant()) {
+                     this.floatsInLiquids = true;
+                 }
+@@ -931,6 +981,7 @@ public class SulfurCube extends AbstractCubeMob implements Bucketable, Shearable
+     @Override
+     public void knockback(final double power, double xd, double zd, final DamageSource source, final float damage, final boolean comesFromEffect, @Nullable Entity attacker, io.papermc.paper.event.entity.EntityKnockbackEvent.Cause eventCause) { // Paper - knockback events
+         if (source.getEntity() != null && this.hasBodyItem()) {
++            this.sakuraEntityController.decouple(); // Sakura - optimise cannon entities
+             float horizontalHitAngleScale = 1.6F;
+             float verticalHitAngleScale = 0.5F;
+             float verticalPositionAngleScale = 0.8F;
 diff --git a/net/minecraft/world/entity/projectile/hurtingprojectile/AbstractHurtingProjectile.java b/net/minecraft/world/entity/projectile/hurtingprojectile/AbstractHurtingProjectile.java
-index 84c07fb51e8321b32f8607a602dd1e417ce36af7..aae799df278a15885b23e9d66a40fc3677a2a7a4 100644
+index 84c07fb51e8321b32f8607a602dd1e417ce36af7..bdbb4e02a3cad9e7e139fdf69a998f5b3ccbf815 100644
 --- a/net/minecraft/world/entity/projectile/hurtingprojectile/AbstractHurtingProjectile.java
 +++ b/net/minecraft/world/entity/projectile/hurtingprojectile/AbstractHurtingProjectile.java
 @@ -18,15 +18,50 @@ import net.minecraft.world.phys.HitResult;
@@ -993,7 +1107,7 @@ index 84c07fb51e8321b32f8607a602dd1e417ce36af7..aae799df278a15885b23e9d66a40fc36
 +    }
 +
 +    @Override
-+    public boolean canLink(final Entity entity) {
++    public boolean canLink(final Entity entity, final int tickDifference) {
 +        return false;
 +    }
 +
@@ -1026,16 +1140,16 @@ index 84c07fb51e8321b32f8607a602dd1e417ce36af7..aae799df278a15885b23e9d66a40fc36
  
      protected AbstractHurtingProjectile(
 diff --git a/net/minecraft/world/entity/projectile/hurtingprojectile/windcharge/AbstractWindCharge.java b/net/minecraft/world/entity/projectile/hurtingprojectile/windcharge/AbstractWindCharge.java
-index 95cd69a068f180e0911b485270e6d368108a1d6b..6f539ce6e3f2eddee7d8db3bae20172ace53991d 100644
+index 19552425af5ddfc649718ca91aff4fed57469934..9c466764d2008010684d7bae23b288d156487ad3 100644
 --- a/net/minecraft/world/entity/projectile/hurtingprojectile/windcharge/AbstractWindCharge.java
 +++ b/net/minecraft/world/entity/projectile/hurtingprojectile/windcharge/AbstractWindCharge.java
-@@ -31,6 +31,13 @@ public abstract class AbstractWindCharge extends AbstractHurtingProjectile imple
+@@ -32,6 +32,13 @@ public abstract class AbstractWindCharge extends AbstractHurtingProjectile imple
      );
      public static final double JUMP_SCALE = 0.25;
  
 +    // Sakura start - optimise cannon entities
 +    @Override
-+    public final boolean canLink(final Entity entity) {
++    public final boolean canLink(final Entity entity, final int tickDifference) {
 +        return true;
 +    }
 +    // Sakura end - optimise cannon entities
@@ -1044,10 +1158,10 @@ index 95cd69a068f180e0911b485270e6d368108a1d6b..6f539ce6e3f2eddee7d8db3bae20172a
          super(type, level);
          this.accelerationPower = 0.0;
 diff --git a/net/minecraft/world/entity/projectile/hurtingprojectile/windcharge/WindCharge.java b/net/minecraft/world/entity/projectile/hurtingprojectile/windcharge/WindCharge.java
-index 5fe01466a4fd1c31a379f0e7a3865b25a8249bda..eec4083d2cdd37f40532f00525f38882829049b4 100644
+index c91adb74bfdc93c5e163b37f7517f530703f6ad5..0f952be087c52ba5de78d1f91aed1c160ec5788d 100644
 --- a/net/minecraft/world/entity/projectile/hurtingprojectile/windcharge/WindCharge.java
 +++ b/net/minecraft/world/entity/projectile/hurtingprojectile/windcharge/WindCharge.java
-@@ -27,6 +27,13 @@ public class WindCharge extends AbstractWindCharge {
+@@ -28,6 +28,13 @@ public class WindCharge extends AbstractWindCharge {
      private static final float MIN_CAMERA_DISTANCE_SQUARED = Mth.square(3.5F);
      private int noDeflectTicks = 5;
  
@@ -1062,10 +1176,10 @@ index 5fe01466a4fd1c31a379f0e7a3865b25a8249bda..eec4083d2cdd37f40532f00525f38882
          super(type, level);
      }
 diff --git a/net/minecraft/world/level/Level.java b/net/minecraft/world/level/Level.java
-index ab82372793a06938bedb8bf88230cee1257fce56..32126bd3398b95464cd262d82dce4f2007e6957d 100644
+index 1b58f77e481548646015af4a2962f8c79571f90f..fe68546f27ce656e81a87b0f59718b0a0451d0da 100644
 --- a/net/minecraft/world/level/Level.java
 +++ b/net/minecraft/world/level/Level.java
-@@ -888,6 +888,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable, ca.spottedl
+@@ -889,6 +889,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable, ca.spottedl
      }
      // Sakura end - implement state watchers and tick scheduler
      public final me.samsuik.sakura.player.visibility.MinimalVisibility minimalVisibility = new me.samsuik.sakura.player.visibility.MinimalVisibility(); // Sakura - client visibility settings
@@ -1074,7 +1188,7 @@ index ab82372793a06938bedb8bf88230cee1257fce56..32126bd3398b95464cd262d82dce4f20
      protected Level(
          final WritableLevelData levelData,
 diff --git a/net/minecraft/world/level/block/BasePressurePlateBlock.java b/net/minecraft/world/level/block/BasePressurePlateBlock.java
-index c2fbf44e93e44c36423465d406b5e4d3db029a80..70c51511a479a6a2dd324e9f9623bdb54138013f 100644
+index f2d7c5fc0339a62c4fc56aa5871cd999e1136ca6..3e215d0e9ff378f2a5385ea550e674a9917d5ec0 100644
 --- a/net/minecraft/world/level/block/BasePressurePlateBlock.java
 +++ b/net/minecraft/world/level/block/BasePressurePlateBlock.java
 @@ -172,6 +172,12 @@ public abstract class BasePressurePlateBlock extends Block {

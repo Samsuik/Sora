@@ -5,7 +5,7 @@ Subject: [PATCH] Purpur Sora fixes
 
 
 diff --git a/net/minecraft/world/entity/monster/Creeper.java b/net/minecraft/world/entity/monster/Creeper.java
-index 2615c3381f812bd64f1961698f7793a4077be5ce..6a16dacddb6a5b3f0a2c26bb1084a6c89a1aba33 100644
+index 4470c6056aa530f7a55abc53f97edcea4a7f6578..ead1b28f9d2469cfae7b9d1e4a35ecad78158d93 100644
 --- a/net/minecraft/world/entity/monster/Creeper.java
 +++ b/net/minecraft/world/entity/monster/Creeper.java
 @@ -378,7 +378,7 @@ public class Creeper extends Monster {
@@ -18,15 +18,15 @@ index 2615c3381f812bd64f1961698f7793a4077be5ce..6a16dacddb6a5b3f0a2c26bb1084a6c8
              this.spawnLingeringCloud();
              this.triggerOnDeathMobEffects(level, Entity.RemovalReason.KILLED);
 diff --git a/net/minecraft/world/item/BucketItem.java b/net/minecraft/world/item/BucketItem.java
-index fb4cc764790048d6485df4bd96cadffaca111b3d..68f57a43e8111c2374041cd2e339b272f1cfa228 100644
+index 3a2db42cd471d220c73b04fd4aa62d3cefecd7da..c79fa7df138102196b1160ebd3272301ae200acb 100644
 --- a/net/minecraft/world/item/BucketItem.java
 +++ b/net/minecraft/world/item/BucketItem.java
-@@ -151,7 +151,7 @@ public class BucketItem extends Item implements DispensibleContainerItem {
-             // CraftBukkit end
-             if (!canPlaceFluidInsideBlock) {
+@@ -165,7 +165,7 @@ public class BucketItem extends Item implements DispensibleContainerItem {
                  return hitResult != null && this.emptyContents(user, level, hitResult.getBlockPos().relative(hitResult.getDirection()), null, direction, clicked, itemStack, hand); // CraftBukkit
--            } else if (!level.sakuraConfig().environment.allowWaterInTheNether && level.environmentAttributes().getValue(EnvironmentAttributes.WATER_EVAPORATES, pos) && this.content.is(FluidTags.WATER)) { // Sakura - allow water in the nether
-+            } else if ((!level.sakuraConfig().environment.allowWaterInTheNether && level.environmentAttributes().getValue(EnvironmentAttributes.WATER_EVAPORATES, pos) || (level.isTheEnd() && !org.purpurmc.purpur.PurpurConfig.allowWaterPlacementInTheEnd)) && this.content == Fluids.WATER) { // Sakura - allow water in the nether // Purpur - Add allow water in end world option
+             }
+ 
+-            if (!level.sakuraConfig().environment.allowWaterInTheNether && level.environmentAttributes().getValue(EnvironmentAttributes.WATER_EVAPORATES, pos) && this.content.is(FluidTags.WATER)) { // Sakura - allow water in the nether
++            if ((level.environmentAttributes().getValue(EnvironmentAttributes.WATER_EVAPORATES, pos) || (level.isNether() && !level.sakuraConfig().environment.allowWaterInTheNether) || (level.isTheEnd() && !org.purpurmc.purpur.PurpurConfig.allowWaterPlacementInTheEnd)) && this.content.is(FluidTags.WATER)) { // Sakura - allow water in the nether // Purpur - Add allow water in end world option
                  int x = pos.getX();
                  int y = pos.getY();
                  int z = pos.getZ();

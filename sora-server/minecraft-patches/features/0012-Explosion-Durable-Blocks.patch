@@ -5,10 +5,10 @@ Subject: [PATCH] Explosion Durable Blocks
 
 
 diff --git a/me/samsuik/sakura/SakuraFeatureHooks.java b/me/samsuik/sakura/SakuraFeatureHooks.java
-index 498a4b40ab49b005171a90a73e57e42a0f1e536d..31b61480691b287c3ee19213a1208965e6017f67 100644
+index 3f2d4a9d4cb78fb4b3b203fe232b7dfa4a2dbd97..9690f5168ac2a626709dba4413c66b5a22499ddb 100644
 --- a/me/samsuik/sakura/SakuraFeatureHooks.java
 +++ b/me/samsuik/sakura/SakuraFeatureHooks.java
-@@ -25,6 +25,7 @@ public final class SakuraFeatureHooks {
+@@ -27,6 +27,7 @@ public final class SakuraFeatureHooks {
      }
  
      public static void setDurableMaterialExpiration(final Identifier worldIdentifier, final Duration duration) {
@@ -18,10 +18,10 @@ index 498a4b40ab49b005171a90a73e57e42a0f1e536d..31b61480691b287c3ee19213a1208965
      private static Optional<Level> getLevel(final Identifier worldIdentifier) {
 diff --git a/me/samsuik/sakura/explosion/DurableBlockManager.java b/me/samsuik/sakura/explosion/DurableBlockManager.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..02f2944e78504d4be7857767a168c64c27c2f800
+index 0000000000000000000000000000000000000000..424108cc66f042e113f0c568f135ed454e2d7b94
 --- /dev/null
 +++ b/me/samsuik/sakura/explosion/DurableBlockManager.java
-@@ -0,0 +1,60 @@
+@@ -0,0 +1,61 @@
 +package me.samsuik.sakura.explosion;
 +
 +import com.google.common.cache.Cache;
@@ -34,6 +34,7 @@ index 0000000000000000000000000000000000000000..02f2944e78504d4be7857767a168c64c
 +
 +@NullMarked
 +public final class DurableBlockManager {
++    private static final int MAX_DURABLE_BLOCKS = 65535;
 +    private Cache<BlockPos, DurableBlock> durableBlocks;
 +
 +    public DurableBlockManager() {
@@ -43,7 +44,7 @@ index 0000000000000000000000000000000000000000..02f2944e78504d4be7857767a168c64c
 +    public void updateExpirationTimer(final long duration, final TimeUnit unit) {
 +        this.durableBlocks = CacheBuilder.newBuilder()
 +            .expireAfterAccess(duration, unit)
-+            .maximumSize(Short.MAX_VALUE)
++            .maximumSize(MAX_DURABLE_BLOCKS)
 +            .build();
 +    }
 +
@@ -83,7 +84,7 @@ index 0000000000000000000000000000000000000000..02f2944e78504d4be7857767a168c64c
 +    }
 +}
 diff --git a/net/minecraft/world/item/BlockItem.java b/net/minecraft/world/item/BlockItem.java
-index 6619e7d69e5c8e434e7e8ac074fe1deaf7894e66..d52820e683163b9fea609d3f48e789dcaf0d1342 100644
+index 10f71b060443189e3bdd08a0884a49e1dbdb4391..901dd18874e4b4c6bfd533dfa6b00b5db8be80f1 100644
 --- a/net/minecraft/world/item/BlockItem.java
 +++ b/net/minecraft/world/item/BlockItem.java
 @@ -37,8 +37,30 @@ public class BlockItem extends Item {
@@ -118,10 +119,10 @@ index 6619e7d69e5c8e434e7e8ac074fe1deaf7894e66..d52820e683163b9fea609d3f48e789dc
          return !placeResult.consumesAction() && context.getItemInHand().has(DataComponents.CONSUMABLE)
              ? super.use(context.getLevel(), context.getPlayer(), context.getHand())
 diff --git a/net/minecraft/world/level/Level.java b/net/minecraft/world/level/Level.java
-index 134d96a70625d2f648cb6b0f9f16e3a5570900f9..93d59eacb8a77366f2135fbbb89f7a8679440d7b 100644
+index e0008123f3af60a5598510dda11364648873eed1..5c895e9c0e0ab88bb55d92756fd2f1756fcca5c3 100644
 --- a/net/minecraft/world/level/Level.java
 +++ b/net/minecraft/world/level/Level.java
-@@ -891,6 +891,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable, ca.spottedl
+@@ -892,6 +892,7 @@ public abstract class Level implements LevelAccessor, AutoCloseable, ca.spottedl
      public final me.samsuik.sakura.entity.SakuraEntityManager sakuraEntityManager = new me.samsuik.sakura.entity.SakuraEntityManager(); // Sakura - optimise cannon entities
      public final me.samsuik.sakura.explosion.density.ExplosionObstructionCache obstructionCache = new me.samsuik.sakura.explosion.density.ExplosionObstructionCache(); // Sakura - optimise explosions
      public final me.samsuik.sakura.mechanics.sake.DispenseRelocationHandler dispenseRelocationHandler = new me.samsuik.sakura.mechanics.sake.DispenseRelocationHandler(this); // Sakura - configure server mechanics
@@ -130,7 +131,7 @@ index 134d96a70625d2f648cb6b0f9f16e3a5570900f9..93d59eacb8a77366f2135fbbb89f7a86
      protected Level(
          final WritableLevelData levelData,
 diff --git a/net/minecraft/world/level/ServerExplosion.java b/net/minecraft/world/level/ServerExplosion.java
-index 9ed58f05dcc6bfd6056fd7c75821a802f3202f35..b79f87017fe0a93a3ab921777fc1acc903c2b9ed 100644
+index 05eb874cf2d3412673d9ff5284ecd5d584d58b43..f03e1043b29283220a8b143823f7861c071ba1bc 100644
 --- a/net/minecraft/world/level/ServerExplosion.java
 +++ b/net/minecraft/world/level/ServerExplosion.java
 @@ -125,7 +125,7 @@ public class ServerExplosion implements Explosion {
@@ -166,7 +167,7 @@ index 9ed58f05dcc6bfd6056fd7c75821a802f3202f35..b79f87017fe0a93a3ab921777fc1acc9
      public ServerExplosion(
          final ServerLevel level,
 @@ -395,6 +411,7 @@ public class ServerExplosion implements Explosion {
-         this.useSlowerRaycasts = this.mechanicsTarget.isServerType(me.samsuik.sakura.mechanics.ServerType.SAKE)
+         this.useSlowerRaycasts = me.samsuik.sakura.mechanics.ExplosionBehaviour.useSingleRaycast(this.mechanicsTarget)
              || this.mechanicsTarget.before(me.samsuik.sakura.mechanics.MechanicVersion.v1_16);
          // Sakura end - configure server mechanics
 +        this.durableMaterials = level.localConfig().at(this.center).durableMaterials; // Sakura - explosion durable blocks
